@@ -4,6 +4,10 @@ version = "0.0.1"
 authors = ["eikendev"]
 edition = "2018"
 description = "A tool for determining the coverage of the security.txt standard."
+homepage = "https://github.com/eikendev/sectxtcov"
+repository = "https://github.com/eikendev/sectxtcov.git"
+readme = "README.md"
+license = "ISC"
 
 [dependencies]
 futures = ">=0.3.5"
