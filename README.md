@@ -1,3 +1,8 @@
+[![Build status](https://img.shields.io/travis/eikendev/sectxtcov/master)](https://travis-ci.org/github/eikendev/sectxtcov/builds/)
+[![License](https://img.shields.io/crates/l/sectxtcov)](https://crates.io/crates/sectxtcov)
+[![Version](https://img.shields.io/crates/v/sectxtcov)](https://crates.io/crates/sectxtcov)
+[![Downloads](https://img.shields.io/crates/d/sectxtcov)](https://crates.io/crates/sectxtcov)
+
 ## About
 
 This tool can be used to determine the coverage of the [security.txt standard](https://securitytxt.org/) among several domains.
