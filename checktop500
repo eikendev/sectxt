@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o errtrace
+
+TOP500URL='https://moz.com/top-500/download/?table=top500Domains'
+
+cargo build --release
+
+tmp_directory="$(mktemp -d)"
+
+exit_handler() {
+	rm -r "$tmp_directory"
+}
+
+trap exit_handler EXIT
+
+curl \
+	--disable \
+	--location \
+	--max-time 60 \
+	--output "$tmp_directory/top.csv" \
+	--show-error \
+	--silent \
+	"$TOP500URL"
+
+xsv select 'Root Domain' "$tmp_directory/top.csv" | tail -n +2 | sort -u > "$tmp_directory/top.txt"
+
+./target/release/sectxtcov --threads 10 --timeout 5 < "$tmp_directory/top.txt"

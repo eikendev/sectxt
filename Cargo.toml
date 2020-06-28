@@ -1,0 +1,18 @@
+[package]
+name = "sectxtcov"
+version = "0.0.1"
+authors = ["eikendev"]
+edition = "2018"
+description = "A tool for determining the coverage of the security.txt standard."
+
+[dependencies]
+futures = ">=0.3.5"
+reqwest = ">=0.10.6"
+
+[dependencies.clap]
+version = ">=2.31"
+features = ["yaml"]
+
+[dependencies.tokio]
+version = ">=0.2"
+features = ["macros"]
