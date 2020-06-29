@@ -91,7 +91,7 @@ fn readlines() -> Vec<String> {
     let v = std::io::stdin()
         .lock()
         .lines()
-        .map(|x| x.unwrap())
+        .filter_map(|x| x.ok())
         .collect();
     v
 }
