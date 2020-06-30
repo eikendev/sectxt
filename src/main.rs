@@ -1,7 +1,5 @@
 #[macro_use]
 extern crate clap;
-extern crate futures;
-extern crate reqwest;
 
 use futures::StreamExt;
 use std::io::prelude::*;
