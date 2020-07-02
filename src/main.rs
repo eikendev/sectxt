@@ -8,8 +8,11 @@ use std::time::Duration;
 fn is_securitytxt(r: reqwest::Response) -> bool {
     match r.status() {
         reqwest::StatusCode::OK => {
-            let content_type = r.headers().get("Content-Type").unwrap();
-            content_type.to_str().unwrap().starts_with("text/plain")
+            if let Some(content_type) = r.headers().get("Content-Type") {
+                return content_type.to_str().unwrap().starts_with("text/plain")
+            };
+
+            false
         }
         _ => false,
     }
