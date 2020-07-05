@@ -4,8 +4,6 @@ use chrono::{DateTime, FixedOffset};
 use iref::IriBuf;
 use oxilangtag::LanguageTag;
 
-// TODO: Support extensions.
-
 #[derive(Debug, PartialEq)]
 pub enum Field {
     Acknowledgments(IriBuf),
@@ -16,6 +14,7 @@ pub enum Field {
     Hiring(IriBuf),
     Policy(IriBuf),
     PreferredLanguages(Vec<LanguageTag<String>>),
+    Extension(String, String),
 }
 
 // TODO: Support signed format.

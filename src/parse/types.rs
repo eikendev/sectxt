@@ -14,8 +14,6 @@ pub enum ParseError {
     InvalidDatetime(#[from] chrono::format::ParseError),
     #[error("field specified in an illegal way")]
     IllegalField,
-    #[error("unknown field")]
-    UnknownField,
 }
 
 macro_rules! impl_from {
@@ -50,7 +48,9 @@ impl TryInto<Field> for RawField<'_> {
     type Error = ParseError;
 
     fn try_into(self) -> Result<Field, Self::Error> {
-        match &self.name.to_lowercase()[..] {
+        let name = self.name.to_lowercase();
+
+        match &name[..] {
             "acknowledgments" => Ok(Field::Acknowledgments(IriBuf::new(self.value)?)),
             "canonical" => Ok(Field::Canonical(IriBuf::new(self.value)?)),
             "contact" => Ok(Field::Contact(IriBuf::new(self.value)?)),
@@ -59,7 +59,7 @@ impl TryInto<Field> for RawField<'_> {
             "hiring" => Ok(Field::Hiring(IriBuf::new(self.value)?)),
             "policy" => Ok(Field::Policy(IriBuf::new(self.value)?)),
             "preferred-languages" => Ok(Field::PreferredLanguages(parse_preferred_languages(self.value)?)),
-            _ => Err(ParseError::UnknownField),
+            _ => Ok(Field::Extension(name, self.value.to_owned())),
         }
     }
 }
