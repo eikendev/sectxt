@@ -1,6 +1,6 @@
 [package]
 name = "sectxt"
-version = "0.0.4"
+version = "0.0.5"
 authors = ["eikendev"]
 edition = "2018"
 description = "A tool for working with security.txt files"
