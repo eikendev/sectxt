@@ -1,6 +1,7 @@
-#[macro_use]
-extern crate clap;
+mod parse;
+mod types;
 
+use clap::{crate_authors, crate_description, crate_name, crate_version, load_yaml, value_t_or_exit};
 use futures::StreamExt;
 use std::io::prelude::*;
 use std::time::Duration;
@@ -9,7 +10,7 @@ fn is_securitytxt(r: reqwest::Response) -> bool {
     match r.status() {
         reqwest::StatusCode::OK => {
             if let Some(content_type) = r.headers().get("Content-Type") {
-                return content_type.to_str().unwrap().starts_with("text/plain")
+                return content_type.to_str().unwrap().starts_with("text/plain");
             };
 
             false
@@ -89,11 +90,7 @@ fn process_result(count: u64, total: usize) {
 
 // https://stackoverflow.com/a/36374135
 fn readlines() -> Vec<String> {
-    let v = std::io::stdin()
-        .lock()
-        .lines()
-        .filter_map(|x| x.ok())
-        .collect();
+    let v = std::io::stdin().lock().lines().filter_map(|x| x.ok()).collect();
     v
 }
 

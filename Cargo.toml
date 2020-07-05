@@ -10,8 +10,13 @@ readme = "README.md"
 license = "ISC"
 
 [dependencies]
+chrono = ">=0.4.10"
 futures = ">=0.3.5"
+iref = ">=1.1"
+nom = ">=5.1.2"
+oxilangtag = ">=0.1.0"
 reqwest = ">=0.10.6"
+thiserror = ">=1.0"
 
 [dependencies.clap]
 version = ">=2.31"
