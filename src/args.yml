@@ -7,12 +7,15 @@ args:
     - threads:
         long: threads
         takes_value: true
-        default_value: '4'
-        env: SECTXT_THREADS
+        default_value: '30'
         help: Number of simultaneous domains to process.
     - timeout:
         long: timeout
         takes_value: true
         default_value: '3'
-        env: SECTXT_TIMEOUT
         help: Seconds to wait before giving up a domain.
+    - quiet:
+        short: q
+        long: quiet
+        takes_value: false
+        help: Only print domains for which the run was successful.

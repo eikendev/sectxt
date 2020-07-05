@@ -36,7 +36,7 @@ fn build_urls<'a>(domains: &'a Vec<String>) -> Vec<(&'a str, [String; 2])> {
     urls
 }
 
-async fn process_domains(domains: &Vec<String>, threads: usize, timeout: u64) -> u64 {
+async fn process_domains(domains: &Vec<String>, threads: usize, timeout: u64, quiet: bool) -> u64 {
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(timeout))
         .build()
@@ -57,7 +57,11 @@ async fn process_domains(domains: &Vec<String>, threads: usize, timeout: u64) ->
                                 return (x.0, true);
                             }
                         }
-                        Err(e) => eprintln!("HTTP request failed: {}", e),
+                        Err(e) => {
+                            if !quiet {
+                                eprintln!("{}: HTTP request failed: {}", x.0, e)
+                            }
+                        },
                     }
                 }
 
@@ -70,13 +74,10 @@ async fn process_domains(domains: &Vec<String>, threads: usize, timeout: u64) ->
         .fold(0, |acc, r| async move {
             match r {
                 (domain, true) => {
-                    println!("{} ... success", domain);
+                    println!("{}", domain);
                     acc + 1
                 }
-                (domain, false) => {
-                    println!("{} ... failure", domain);
-                    acc
-                }
+                _ => acc,
             }
         })
         .await;
@@ -107,10 +108,13 @@ async fn main() {
 
     let threads = value_t_or_exit!(matches.value_of("threads"), usize);
     let timeout = value_t_or_exit!(matches.value_of("timeout"), u64);
+    let quiet = matches.is_present("quiet");
 
     let domains = readlines();
 
-    let count = process_domains(&domains, threads, timeout).await;
+    let count = process_domains(&domains, threads, timeout, quiet).await;
 
-    process_result(count, domains.len());
+    if !quiet {
+        process_result(count, domains.len());
+    }
 }
