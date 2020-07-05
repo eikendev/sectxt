@@ -8,11 +8,11 @@ args:
         long: threads
         takes_value: true
         default_value: '4'
-        env: SECTXTCOV_THREADS
+        env: SECTXT_THREADS
         help: Number of simultaneous domains to process.
     - timeout:
         long: timeout
         takes_value: true
         default_value: '3'
-        env: SECTXTCOV_TIMEOUT
+        env: SECTXT_TIMEOUT
         help: Seconds to wait before giving up a domain.

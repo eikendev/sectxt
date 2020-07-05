@@ -26,4 +26,4 @@ curl \
 
 xsv select 'Root Domain' "$tmp_directory/top.csv" | tail -n +2 | sort -u > "$tmp_directory/top.txt"
 
-./target/release/sectxtcov --threads 10 --timeout 5 < "$tmp_directory/top.txt"
+./target/release/sectxt --threads 10 --timeout 5 < "$tmp_directory/top.txt"

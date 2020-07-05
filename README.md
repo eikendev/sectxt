@@ -1,17 +1,14 @@
-[![Build status](https://img.shields.io/travis/eikendev/sectxtcov/master)](https://travis-ci.org/github/eikendev/sectxtcov/builds/)
-[![License](https://img.shields.io/crates/l/sectxtcov)](https://crates.io/crates/sectxtcov)
-[![Version](https://img.shields.io/crates/v/sectxtcov)](https://crates.io/crates/sectxtcov)
-[![Downloads](https://img.shields.io/crates/d/sectxtcov)](https://crates.io/crates/sectxtcov)
-
-New versions of this crate will be published as [sectxt](https://crates.io/crates/sectxt) to indicate more general functionality.
-If you want to take ownership of the name `sectxtcov`, please reach out to me.
+[![Build status](https://img.shields.io/travis/eikendev/sectxt/master)](https://travis-ci.org/github/eikendev/sectxt/builds/)
+[![License](https://img.shields.io/crates/l/sectxt)](https://crates.io/crates/sectxt)
+[![Version](https://img.shields.io/crates/v/sectxt)](https://crates.io/crates/sectxt)
+[![Downloads](https://img.shields.io/crates/d/sectxt)](https://crates.io/crates/sectxt)
 
 ## About
 
-This tool can be used to determine the coverage of the [security.txt standard](https://securitytxt.org/) among several domains.
+This tool can be used to determine the adoption of the [security.txt standard](https://securitytxt.org/) among several domains.
 You feed it a list of domains and it will tell you how many of them implement the standard already.
 ```bash
-sectxtcov < domains.txt
+sectxt < domains.txt
 ```
 
 The idea was ~~shamelessly stolen from~~ inspired by [haksecuritytxt](https://github.com/hakluke/haksecuritytxt).
@@ -22,7 +19,7 @@ Besides, I wanted to enforce stricter checks for the standard, i.e., the server 
 ## Usage
 
 Mozilla maintains a [list of popular websites](https://moz.com/top500).
-Running `./checktop500` downloads that list, and runs `sectxtcov` against it.
+Running `./checktop500` downloads that list, and runs `sectxt` against it.
 As a result, you will see how many of these websites deploy a `security.txt` file.
 
 For the script to run you need to install [xsv](https://github.com/BurntSushi/xsv), which is another convenient utility by [BurntSushi](https://github.com/BurntSushi).

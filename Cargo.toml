@@ -1,11 +1,11 @@
 [package]
-name = "sectxtcov"
+name = "sectxt"
 version = "0.0.4"
 authors = ["eikendev"]
 edition = "2018"
-description = "A tool for determining the coverage of the security.txt standard."
-homepage = "https://github.com/eikendev/sectxtcov"
-repository = "https://github.com/eikendev/sectxtcov.git"
+description = "A tool for working with security.txt files"
+homepage = "https://github.com/eikendev/sectxt"
+repository = "https://github.com/eikendev/sectxt.git"
 readme = "README.md"
 license = "ISC"
 
