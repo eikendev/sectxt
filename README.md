@@ -3,6 +3,9 @@
 [![Version](https://img.shields.io/crates/v/sectxtcov)](https://crates.io/crates/sectxtcov)
 [![Downloads](https://img.shields.io/crates/d/sectxtcov)](https://crates.io/crates/sectxtcov)
 
+New versions of this crate will be published as [sectxt](https://crates.io/crates/sectxt) to indicate more general functionality.
+If you want to take ownership of the name `sectxtcov`, please reach out to me.
+
 ## About
 
 This tool can be used to determine the coverage of the [security.txt standard](https://securitytxt.org/) among several domains.
