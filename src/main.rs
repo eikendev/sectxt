@@ -3,20 +3,23 @@ mod types;
 
 use clap::{crate_authors, crate_description, crate_name, crate_version, load_yaml, value_t_or_exit};
 use futures::StreamExt;
+use std::convert::TryFrom;
 use std::io::prelude::*;
 use std::time::Duration;
+use types::SecurityTxt;
 
-fn is_securitytxt(r: reqwest::Response) -> bool {
-    match r.status() {
-        reqwest::StatusCode::OK => {
-            if let Some(content_type) = r.headers().get("Content-Type") {
-                return content_type.to_str().unwrap().starts_with("text/plain");
-            };
-
-            false
+async fn is_securitytxt(r: reqwest::Response) -> bool {
+    if r.status() == reqwest::StatusCode::OK {
+        if let Some(content_type) = r.headers().get("Content-Type") {
+            if content_type.to_str().unwrap().starts_with("text/plain") {
+                if let Ok(s) = r.text().await {
+                    return SecurityTxt::try_from(&s[..]).is_ok();
+                }
+            }
         }
-        _ => false,
     }
+
+    false
 }
 
 fn build_urls<'a>(domains: &'a Vec<String>) -> Vec<(&'a str, [String; 2])> {
@@ -53,7 +56,7 @@ async fn process_domains(domains: &Vec<String>, threads: usize, timeout: u64, qu
 
                     match response {
                         Ok(r) => {
-                            if is_securitytxt(r) {
+                            if is_securitytxt(r).await {
                                 return (x.0, true);
                             }
                         }
@@ -61,7 +64,7 @@ async fn process_domains(domains: &Vec<String>, threads: usize, timeout: u64, qu
                             if !quiet {
                                 eprintln!("{}: HTTP request failed: {}", x.0, e)
                             }
-                        },
+                        }
                     }
                 }
 

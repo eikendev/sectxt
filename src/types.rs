@@ -3,6 +3,8 @@ use super::parse::ParseError;
 use chrono::{DateTime, FixedOffset};
 use iref::IriBuf;
 use oxilangtag::LanguageTag;
+use std::convert::TryFrom;
+use std::convert::TryInto;
 
 #[derive(Debug, PartialEq)]
 pub enum Field {
@@ -46,5 +48,20 @@ impl SecurityTxt {
         } else {
             Err(ParseError::IllegalField)
         }
+    }
+}
+
+impl TryFrom<&str> for SecurityTxt {
+    type Error = ParseError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let (_, fields) = crate::parse::line_parser(value)?;
+        let fields: Vec<Field> = fields
+            .into_iter()
+            .filter_map(|x| x)
+            .map(|x| x.try_into())
+            .collect::<Result<Vec<Field>, Self::Error>>()?;
+
+        SecurityTxt::new(fields)
     }
 }

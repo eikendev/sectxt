@@ -3,31 +3,16 @@ mod types;
 
 pub use super::types::{Field, SecurityTxt};
 
+pub use parsers::line_parser;
 pub use types::ParseError;
-
-use std::convert::TryFrom;
-use std::convert::TryInto;
-
-impl TryFrom<&str> for SecurityTxt {
-    type Error = ParseError;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        let (_, fields) = parsers::line_parser(value)?;
-        let fields: Vec<Field> = fields
-            .into_iter()
-            .filter_map(|x| x)
-            .map(|x| x.try_into())
-            .collect::<Result<Vec<Field>, Self::Error>>()?;
-
-        SecurityTxt::new(fields)
-    }
-}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
     use iref::IriBuf;
     use oxilangtag::LanguageTag;
+    use std::convert::TryFrom;
 
     const URL: &str = "https://securitytxt.org/";
 
