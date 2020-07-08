@@ -65,3 +65,64 @@ impl TryFrom<&str> for SecurityTxt {
         SecurityTxt::new(fields)
     }
 }
+
+pub struct Status<'a> {
+    pub domain: &'a str,
+    pub available: bool,
+}
+
+pub struct Website<'a> {
+    pub domain: &'a str,
+    pub urls: Vec<String>,
+}
+
+async fn is_securitytxt(r: reqwest::Response) -> bool {
+    if r.status() == reqwest::StatusCode::OK {
+        if let Some(content_type) = r.headers().get("Content-Type") {
+            if content_type.to_str().unwrap().starts_with("text/plain") {
+                if let Ok(s) = r.text().await {
+                    return SecurityTxt::try_from(&s[..]).is_ok();
+                }
+            }
+        }
+    }
+
+    false
+}
+
+impl<'a> Website<'a> {
+    pub async fn get_status(self, client: &reqwest::Client, quiet: bool) -> Status<'a> {
+        for url in self.urls {
+            let response = client.get(&url[..]).send().await;
+
+            match response {
+                Ok(r) => {
+                    if is_securitytxt(r).await {
+                        println!("{}", self.domain);
+
+                        return Status { domain: self.domain, available: true};
+                    }
+                }
+                Err(e) => {
+                    if !quiet {
+                        eprintln!("{}: HTTP request failed: {}", self.domain, e)
+                    }
+                }
+            }
+        }
+
+        Status { domain: self.domain, available: false }
+    }
+}
+
+impl<'a> From<&'a str> for Website<'a> {
+    fn from(s: &'a str) -> Self {
+        Website {
+            domain: s,
+            urls: vec!(
+                format!("https://{}/.well-known/security.txt", s),
+                format!("https://{}/security.txt", s),
+            ),
+        }
+    }
+}

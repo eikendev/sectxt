@@ -3,41 +3,9 @@ mod types;
 
 use clap::{crate_authors, crate_description, crate_name, crate_version, load_yaml, value_t_or_exit};
 use futures::StreamExt;
-use std::convert::TryFrom;
 use std::io::prelude::*;
 use std::time::Duration;
-use types::SecurityTxt;
-
-async fn is_securitytxt(r: reqwest::Response) -> bool {
-    if r.status() == reqwest::StatusCode::OK {
-        if let Some(content_type) = r.headers().get("Content-Type") {
-            if content_type.to_str().unwrap().starts_with("text/plain") {
-                if let Ok(s) = r.text().await {
-                    return SecurityTxt::try_from(&s[..]).is_ok();
-                }
-            }
-        }
-    }
-
-    false
-}
-
-fn build_urls<'a>(domains: &'a Vec<String>) -> Vec<(&'a str, [String; 2])> {
-    let urls: Vec<(&str, [String; 2])> = domains
-        .into_iter()
-        .map(|x| {
-            (
-                &x[..],
-                [
-                    format!("https://{}/.well-known/security.txt", x),
-                    format!("https://{}/security.txt", x),
-                ],
-            )
-        })
-        .collect();
-
-    urls
-}
+use types::Website;
 
 async fn process_domains(domains: &Vec<String>, threads: usize, timeout: u64, quiet: bool) -> u64 {
     let client = reqwest::Client::builder()
@@ -45,41 +13,21 @@ async fn process_domains(domains: &Vec<String>, threads: usize, timeout: u64, qu
         .build()
         .unwrap();
 
-    let urls = build_urls(domains);
-
-    let responses = futures::stream::iter(urls)
+    let responses = futures::stream::iter(domains)
         .map(|x| {
             let client = &client;
+
             async move {
-                for url in &x.1 {
-                    let response = client.get(url).send().await;
-
-                    match response {
-                        Ok(r) => {
-                            if is_securitytxt(r).await {
-                                return (x.0, true);
-                            }
-                        }
-                        Err(e) => {
-                            if !quiet {
-                                eprintln!("{}: HTTP request failed: {}", x.0, e)
-                            }
-                        }
-                    }
-                }
-
-                (x.0, false)
+                let website = Website::from(&x[..]);
+                return website.get_status(client, quiet).await;
             }
         })
         .buffer_unordered(threads);
 
     let count: u64 = responses
-        .fold(0, |acc, r| async move {
-            match r {
-                (domain, true) => {
-                    println!("{}", domain);
-                    acc + 1
-                }
+        .fold(0, |acc, s| async move {
+            match s {
+                _ if s.available => acc + 1,
                 _ => acc,
             }
         })
