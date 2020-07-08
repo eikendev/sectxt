@@ -3,8 +3,7 @@ mod types;
 
 use clap::{crate_authors, crate_description, crate_name, crate_version, load_yaml, value_t_or_exit};
 use futures::channel::mpsc::channel;
-use futures::Stream;
-use futures::StreamExt;
+use futures::{Stream, StreamExt};
 use std::io::BufRead;
 use std::time::Duration;
 use types::Website;
@@ -30,7 +29,7 @@ fn stdin(threads: usize) -> impl Stream<Item = String> {
     rx
 }
 
-async fn process_domains(threads: usize, timeout: u64, quiet: bool) -> (u64,u64) {
+async fn process_domains(threads: usize, timeout: u64, quiet: bool) -> (u64, u64) {
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(timeout))
         .build()
@@ -47,7 +46,7 @@ async fn process_domains(threads: usize, timeout: u64, quiet: bool) -> (u64,u64)
         })
         .buffer_unordered(threads);
 
-    let count: (u64,u64) = responses
+    let count: (u64, u64) = responses
         .fold((0, 0), |acc, s| async move {
             match s {
                 _ if s.available => (acc.0 + 1, acc.1 + 1),

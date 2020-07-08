@@ -100,7 +100,10 @@ impl Website {
                     if is_securitytxt(r).await {
                         println!("{}", self.domain);
 
-                        return Status { domain: self.domain, available: true};
+                        return Status {
+                            domain: self.domain,
+                            available: true,
+                        };
                     }
                 }
                 Err(e) => {
@@ -111,7 +114,10 @@ impl Website {
             }
         }
 
-        Status { domain: self.domain, available: false }
+        Status {
+            domain: self.domain,
+            available: false,
+        }
     }
 }
 
@@ -119,10 +125,10 @@ impl From<&str> for Website {
     fn from(s: &str) -> Self {
         Website {
             domain: s.to_owned(),
-            urls: vec!(
+            urls: vec![
                 format!("https://{}/.well-known/security.txt", s),
                 format!("https://{}/security.txt", s),
-            ),
+            ],
         }
     }
 }
