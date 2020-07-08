@@ -66,13 +66,13 @@ impl TryFrom<&str> for SecurityTxt {
     }
 }
 
-pub struct Status<'a> {
-    pub domain: &'a str,
+pub struct Status {
+    pub domain: String,
     pub available: bool,
 }
 
-pub struct Website<'a> {
-    pub domain: &'a str,
+pub struct Website {
+    pub domain: String,
     pub urls: Vec<String>,
 }
 
@@ -90,8 +90,8 @@ async fn is_securitytxt(r: reqwest::Response) -> bool {
     false
 }
 
-impl<'a> Website<'a> {
-    pub async fn get_status(self, client: &reqwest::Client, quiet: bool) -> Status<'a> {
+impl Website {
+    pub async fn get_status(self, client: &reqwest::Client, quiet: bool) -> Status {
         for url in self.urls {
             let response = client.get(&url[..]).send().await;
 
@@ -115,10 +115,10 @@ impl<'a> Website<'a> {
     }
 }
 
-impl<'a> From<&'a str> for Website<'a> {
-    fn from(s: &'a str) -> Self {
+impl From<&str> for Website {
+    fn from(s: &str) -> Self {
         Website {
-            domain: s,
+            domain: s.to_owned(),
             urls: vec!(
                 format!("https://{}/.well-known/security.txt", s),
                 format!("https://{}/security.txt", s),
