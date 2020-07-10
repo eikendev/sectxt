@@ -21,6 +21,8 @@ mod tests {
         let file = format!("Contact: {}\n", URL);
         let sec = SecurityTxt {
             fields: vec![Field::Contact(IriBuf::new(URL).unwrap())],
+            expires_pos: None,
+            planguages_pos: None,
         };
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
@@ -31,6 +33,8 @@ mod tests {
         let file = format!("# this is a comment\n#\nContact: {}\n#\n", URL);
         let sec = SecurityTxt {
             fields: vec![Field::Contact(IriBuf::new(URL).unwrap())],
+            expires_pos: None,
+            planguages_pos: None,
         };
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
@@ -41,6 +45,8 @@ mod tests {
         let file = format!("\n\n\nContact: {}\n\n\n", URL);
         let sec = SecurityTxt {
             fields: vec![Field::Contact(IriBuf::new(URL).unwrap())],
+            expires_pos: None,
+            planguages_pos: None,
         };
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
@@ -54,6 +60,8 @@ mod tests {
                 Field::Contact(IriBuf::new(URL).unwrap()),
                 Field::Acknowledgments(IriBuf::new(URL).unwrap()),
             ],
+            expires_pos: None,
+            planguages_pos: None,
         };
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
@@ -81,6 +89,8 @@ mod tests {
                 Field::Contact(IriBuf::new(URL).unwrap()),
                 Field::PreferredLanguages(vec![LanguageTag::parse_and_normalize("en").unwrap()]),
             ],
+            expires_pos: None,
+            planguages_pos: Some(1),
         };
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
@@ -88,17 +98,21 @@ mod tests {
 
     #[test]
     fn test_signed_contact() {
-        let file = format!("\
+        let file = format!(
+            "\
             -----BEGIN PGP SIGNED MESSAGE-----\n\
             Hash: SHA256\n\n\
             Contact: {}\n\
             -----BEGIN PGP SIGNATURE-----\n\
             Version: GnuPG v2.2\n\n\
             abcdefABCDEF/+==\n\
-            -----END PGP SIGNATURE-----\n", URL);
-        println!("{}", file);
+            -----END PGP SIGNATURE-----\n",
+            URL
+        );
         let sec = SecurityTxt {
             fields: vec![Field::Contact(IriBuf::new(URL).unwrap())],
+            expires_pos: None,
+            planguages_pos: None,
         };
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));

@@ -22,30 +22,57 @@ pub enum Field {
 #[derive(Debug, PartialEq)]
 pub struct SecurityTxt {
     pub(crate) fields: Vec<Field>,
+    pub expires_pos: Option<usize>,
+    pub planguages_pos: Option<usize>,
 }
 
 macro_rules! count_variant {
-    ( $variant:path, $iterator:expr ) => {
-        $iterator.fields.iter().filter(|val| matches!(val, $variant(_))).count()
+    ( $variant:path, $vector:expr ) => {
+        $vector.iter().filter(|x| matches!(x, $variant(_))).count()
+    };
+}
+
+macro_rules! get_variant_position {
+    ( $variant:path, $vector:expr ) => {
+        $vector.iter().position(|x| matches!(x, $variant(_)))
     };
 }
 
 impl SecurityTxt {
     pub fn new(fields: Vec<Field>) -> Result<Self, ParseError> {
-        let st = SecurityTxt { fields: fields };
+        let count = count_variant!(Field::Contact, fields);
+        if count == 0 {
+            return Err(ParseError::IllegalField);
+        }
 
-        let count_contacts = count_variant!(Field::Contact, st);
-        let count_expires = count_variant!(Field::Expires, st);
-        let count_planguages = count_variant!(Field::PreferredLanguages, st);
+        let count = count_variant!(Field::Expires, fields);
+        if count > 1 {
+            return Err(ParseError::IllegalField);
+        }
 
-        // TODO: Preferred-Languages MUST NOT be empty.
+        let count = count_variant!(Field::PreferredLanguages, fields);
+        if count > 1 {
+            return Err(ParseError::IllegalField);
+        }
+
+        let expires_pos = get_variant_position!(Field::Expires, fields);
+        let planguages_pos = get_variant_position!(Field::PreferredLanguages, fields);
+
+        if let Some(pos) = planguages_pos {
+            if let Field::PreferredLanguages(languages) = &fields[pos] {
+                if languages.len() == 0 {
+                    return Err(ParseError::IllegalField);
+                }
+            }
+        }
+
         // TODO: https MUST be used for web URLs.
 
-        if count_contacts >= 1 && count_expires <= 1 && count_planguages <= 1 {
-            Ok(st)
-        } else {
-            Err(ParseError::IllegalField)
-        }
+        Ok(SecurityTxt {
+            fields: fields,
+            expires_pos: expires_pos,
+            planguages_pos: planguages_pos,
+        })
     }
 }
 

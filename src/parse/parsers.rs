@@ -2,9 +2,9 @@ use super::types::RawField;
 
 use nom::{
     branch::alt,
-    bytes::complete::{tag, take_while, take_until},
+    bytes::complete::{tag, take_until, take_while},
     character::complete::{char, line_ending, not_line_ending},
-    combinator::{all_consuming},
+    combinator::all_consuming,
     multi::{many0, many1},
     sequence::{delimited, tuple},
     IResult,
