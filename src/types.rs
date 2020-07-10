@@ -19,8 +19,6 @@ pub enum Field {
     Extension(String, String),
 }
 
-// TODO: Support signed format.
-
 #[derive(Debug, PartialEq)]
 pub struct SecurityTxt {
     pub(crate) fields: Vec<Field>,
