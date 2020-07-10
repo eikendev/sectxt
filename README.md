@@ -6,7 +6,7 @@
 ## About
 
 This tool can be used to determine the adoption of the [security.txt standard](https://securitytxt.org/) among several domains.
-You feed it a list of domains and it will tell you how many of them implement the standard already.
+You feed it a list of domains and it will tell you which of them implement the standard already.
 ```bash
 sectxt < domains.txt
 ```
@@ -22,4 +22,4 @@ Mozilla maintains a [list of popular websites](https://moz.com/top500).
 Running `./checktop500` downloads that list, and runs `sectxt` against it.
 As a result, you will see which of these websites deploy a `security.txt` file.
 
-For the script to run you need to install [xsv](https://github.com/BurntSushi/xsv), which is another convenient utility by [BurntSushi](https://github.com/BurntSushi).
+For the shell script to run you need to install [xsv](https://github.com/BurntSushi/xsv), which is another convenient utility by [BurntSushi](https://github.com/BurntSushi).
