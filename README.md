@@ -1,4 +1,4 @@
-[![Build status](https://img.shields.io/travis/eikendev/sectxt/master)](https://travis-ci.org/github/eikendev/sectxt/builds/)
+[![Build status](https://img.shields.io/travis/eikendev/sectxt/master)](https://travis-ci.com/github/eikendev/sectxt/builds/)
 [![License](https://img.shields.io/crates/l/sectxt)](https://crates.io/crates/sectxt)
 [![Version](https://img.shields.io/crates/v/sectxt)](https://crates.io/crates/sectxt)
 [![Downloads](https://img.shields.io/crates/d/sectxt)](https://crates.io/crates/sectxt)
