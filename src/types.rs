@@ -55,7 +55,7 @@ impl TryFrom<&str> for SecurityTxt {
     type Error = ParseError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        let (_, fields) = crate::parse::line_parser(value)?;
+        let (_, fields) = crate::parse::body_parser(value)?;
         let fields: Vec<Field> = fields
             .into_iter()
             .filter_map(|x| x)

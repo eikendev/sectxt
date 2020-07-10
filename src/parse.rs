@@ -3,7 +3,7 @@ mod types;
 
 pub use super::types::{Field, SecurityTxt};
 
-pub use parsers::line_parser;
+pub use parsers::body_parser;
 pub use types::ParseError;
 
 #[cfg(test)]
@@ -81,6 +81,24 @@ mod tests {
                 Field::Contact(IriBuf::new(URL).unwrap()),
                 Field::PreferredLanguages(vec![LanguageTag::parse_and_normalize("en").unwrap()]),
             ],
+        };
+
+        assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
+    }
+
+    #[test]
+    fn test_signed_contact() {
+        let file = format!("\
+            -----BEGIN PGP SIGNED MESSAGE-----\n\
+            Hash: SHA256\n\n\
+            Contact: {}\n\
+            -----BEGIN PGP SIGNATURE-----\n\
+            Version: GnuPG v2.2\n\n\
+            abcdefABCDEF/+==\n\
+            -----END PGP SIGNATURE-----\n", URL);
+        println!("{}", file);
+        let sec = SecurityTxt {
+            fields: vec![Field::Contact(IriBuf::new(URL).unwrap())],
         };
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
