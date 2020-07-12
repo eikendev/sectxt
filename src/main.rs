@@ -29,6 +29,7 @@ fn stdin(threads: usize) -> impl Stream<Item = String> {
     rx
 }
 
+#[tokio::main]
 async fn process_domains(threads: usize, timeout: u64, quiet: bool) -> (u64, u64) {
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(timeout))
@@ -62,8 +63,7 @@ fn process_result(total: u64, available: u64) {
     println!("{}/{}", available, total);
 }
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let args_yaml = load_yaml!("args.yml");
 
     let matches = clap::App::from_yaml(args_yaml)
@@ -77,7 +77,7 @@ async fn main() {
     let timeout = value_t_or_exit!(matches.value_of("timeout"), u64);
     let quiet = matches.is_present("quiet");
 
-    let count = process_domains(threads, timeout, quiet).await;
+    let count = process_domains(threads, timeout, quiet);
 
     if !quiet {
         process_result(count.0, count.1);
