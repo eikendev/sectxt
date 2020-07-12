@@ -6,8 +6,7 @@ rust:
 before_script:
   - rustup component add clippy
 script:
-  - cargo clippy --all-targets --all-features -- -D warnings
-  - cargo test --verbose
+  - make test
 deploy:
   provider: cargo
   token: "$CRATES_TOKEN"
