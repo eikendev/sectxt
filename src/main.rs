@@ -35,7 +35,7 @@ async fn process_domains(threads: usize, timeout: u64, quiet: bool) -> (u64, u64
         .build()
         .unwrap();
 
-    let responses = stdin(threads)
+    let statuses = stdin(threads)
         .map(|x| {
             let client = &client;
 
@@ -46,7 +46,7 @@ async fn process_domains(threads: usize, timeout: u64, quiet: bool) -> (u64, u64
         })
         .buffer_unordered(threads);
 
-    let count: (u64, u64) = responses
+    let count: (u64, u64) = statuses
         .fold((0, 0), |acc, s| async move {
             match s {
                 _ if s.available => (acc.0 + 1, acc.1 + 1),
