@@ -1,5 +1,13 @@
 os: linux
 language: rust
+rust:
+  - stable
+  - beta
+before_script:
+  - rustup component add clippy
+script:
+  - cargo clippy --all-targets --all-features -- -D warnings
+  - cargo test --verbose
 deploy:
   provider: cargo
   token: "$CRATES_TOKEN"
