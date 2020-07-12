@@ -59,7 +59,7 @@ fn line_parser(i: &str) -> IResult<&str, Option<RawField>> {
 }
 
 fn is_field_name_char(c: char) -> bool {
-    c.is_ascii() && !c.is_control() && !(c == ':') && !(c == ' ')
+    c.is_ascii() && !c.is_control() && (c != ':') && (c != ' ')
 }
 
 fn field_parser(i: &str) -> IResult<&str, Option<RawField>> {

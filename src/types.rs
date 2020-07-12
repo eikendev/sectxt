@@ -60,7 +60,7 @@ impl SecurityTxt {
 
         if let Some(pos) = planguages_pos {
             if let Field::PreferredLanguages(languages) = &fields[pos] {
-                if languages.len() == 0 {
+                if languages.is_empty() {
                     return Err(ParseError::IllegalField);
                 }
             }
@@ -69,9 +69,9 @@ impl SecurityTxt {
         // TODO: https MUST be used for web URLs.
 
         Ok(SecurityTxt {
-            fields: fields,
-            expires_pos: expires_pos,
-            planguages_pos: planguages_pos,
+            fields,
+            expires_pos,
+            planguages_pos,
         })
     }
 }
