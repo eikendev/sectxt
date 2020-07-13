@@ -4,7 +4,7 @@ rust:
   - stable
   - beta
 before_script:
-  - rustup component add clippy
+  - make rustup
 script:
   - make test
 deploy:
