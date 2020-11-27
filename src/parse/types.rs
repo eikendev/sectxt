@@ -29,7 +29,7 @@ macro_rules! impl_from {
 impl_from!(ParseError, iref::Error, ParseError::Malformed);
 impl_from!(
     ParseError,
-    nom::Err<(&str, nom::error::ErrorKind)>,
+    nom::Err<nom::error::Error<&str>>,
     ParseError::Malformed
 );
 impl_from!(ParseError, LanguageTagParseError, ParseError::Malformed);
