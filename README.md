@@ -18,7 +18,7 @@ Besides, I wanted to enforce stricter checks for the standard, i.e., the server 
 
 ## Usage
 
-Mozilla maintains a [list of popular websites](https://moz.com/top500).
+Moz maintains a [list of popular websites](https://moz.com/top500).
 Running `./checktop500` downloads that list, and runs `sectxt` against it.
 As a result, you will see which of these websites deploy a `security.txt` file.
 
