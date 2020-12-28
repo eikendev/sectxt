@@ -4,7 +4,13 @@ test:
 	cargo clippy --all-targets --all-features -- -D warnings
 	cargo test --verbose
 
-.PHONY: rustup
-rustup:
+.PHONY: setup
+setup:
+	rustup update
 	rustup component add clippy
 	rustup component add rustfmt
+	rustup show
+
+.PHONY: publish
+publish:
+	cargo publish
