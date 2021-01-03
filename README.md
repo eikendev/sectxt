@@ -19,7 +19,7 @@ Besides, I wanted to enforce stricter checks for the standard, i.e., the server 
 ## Usage
 
 Moz maintains a [list of popular websites](https://moz.com/top500).
-Running `./checktop500` downloads that list, and runs `sectxt` against it.
+Running `./scripts/checktop500` downloads that list, and runs `sectxt` against it.
 As a result, you will see which of these websites deploy a `security.txt` file.
 
 For the shell script to run you need to install [xsv](https://github.com/BurntSushi/xsv), which is another convenient utility by [BurntSushi](https://github.com/BurntSushi).
