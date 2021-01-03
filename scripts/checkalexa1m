@@ -3,7 +3,7 @@
 set -o errexit
 set -o errtrace
 
-SOURCEURL='https://moz.com/top-500/download/?table=top500Domains'
+SOURCEURL='http://s3.amazonaws.com/alexa-static/top-1m.csv.zip'
 
 cargo build --release
 
@@ -19,9 +19,11 @@ curl \
 	--disable \
 	--location \
 	--max-time 60 \
-	--output "$tmp_directory/top.csv" \
+	--output "$tmp_directory/top.csv.zip" \
 	"$SOURCEURL"
 
-xsv select 'Root Domain' "$tmp_directory/top.csv" | tail -n +2 | sort -u > "$tmp_directory/top.txt"
+unzip "$tmp_directory/top.csv.zip" -d "$tmp_directory"
+
+xsv select 2 "$tmp_directory/top-1m.csv" | sort -u > "$tmp_directory/top.txt"
 
 ./target/release/sectxt --threads 50 --timeout 5 --quiet < "$tmp_directory/top.txt"
