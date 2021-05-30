@@ -83,7 +83,7 @@ impl TryFrom<&str> for SecurityTxt {
         let (_, fields) = crate::parse::body_parser(value)?;
         let fields: Vec<Field> = fields
             .into_iter()
-            .filter_map(|x| x)
+            .flatten()
             .map(|x| x.try_into())
             .collect::<Result<Vec<Field>, Self::Error>>()?;
 

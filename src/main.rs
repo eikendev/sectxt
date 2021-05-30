@@ -12,15 +12,13 @@ fn stdin(threads: usize) -> impl Stream<Item = String> {
     let (mut tx, rx) = channel(threads);
 
     std::thread::spawn(move || {
-        for line in std::io::stdin().lock().lines() {
-            if let Ok(line) = line {
-                loop {
-                    let status = tx.try_send(line.to_owned());
+        for line in std::io::stdin().lock().lines().flatten() {
+            loop {
+                let status = tx.try_send(line.to_owned());
 
-                    match status {
-                        Err(e) if e.is_full() => continue,
-                        _ => break,
-                    }
+                match status {
+                    Err(e) if e.is_full() => continue,
+                    _ => break,
                 }
             }
         }
@@ -64,6 +62,8 @@ fn process_result(total: u64, available: u64) {
 }
 
 fn main() {
+    human_panic::setup_panic!();
+
     let args_yaml = load_yaml!("args.yml");
 
     let matches = clap::App::from_yaml(args_yaml)
