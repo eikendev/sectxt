@@ -23,3 +23,11 @@ Running `./scripts/checktop500` downloads that list, and runs `sectxt` against i
 As a result, you will see which of these websites deploy a `security.txt` file.
 
 For the shell script to run you need to install [xsv](https://github.com/BurntSushi/xsv), which is another convenient utility by [BurntSushi](https://github.com/BurntSushi).
+
+## Installation
+
+### From crates.io
+
+```bash
+cargo install sectxt
+```
