@@ -828,7 +828,7 @@ dependencies = [
 
 [[package]]
 name = "sectxt"
-version = "0.0.10"
+version = "0.0.11"
 dependencies = [
  "argh",
  "chrono",
