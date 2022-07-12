@@ -18,10 +18,8 @@ oxilangtag = ">=0.1.0"
 reqwest = ">=0.11"
 thiserror = ">=1.0"
 human-panic = "1.0.3"
-
-[dependencies.clap]
-version = ">=2.31"
-features = ["yaml"]
+argh = "0.1.8"
+lazy_static = "1.4.0"
 
 [dependencies.tokio]
 version = "1"

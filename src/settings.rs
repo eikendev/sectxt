@@ -1,0 +1,17 @@
+use argh::FromArgs;
+
+#[derive(FromArgs)]
+/// A tool for working with security.txt files.
+pub struct Settings {
+    /// number of simultaneous domains to process
+    #[argh(option, default = "30")]
+    pub threads: usize,
+
+    /// seconds to wait before giving up a domain
+    #[argh(option, default = "3")]
+    pub timeout: u64,
+
+    /// only print domains for which the run was successful
+    #[argh(switch, short = 'q')]
+    pub quiet: bool,
+}

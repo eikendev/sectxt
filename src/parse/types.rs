@@ -37,7 +37,7 @@ pub struct RawField<'a> {
 }
 
 fn parse_preferred_languages(value: &str) -> Result<Vec<LanguageTag<String>>, LanguageTagParseError> {
-    value.split(", ").map(|x| LanguageTag::parse_and_normalize(x)).collect()
+    value.split(", ").map(LanguageTag::parse_and_normalize).collect()
 }
 
 impl TryInto<Field> for RawField<'_> {

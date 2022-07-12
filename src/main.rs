@@ -1,9 +1,11 @@
 mod parse;
+mod settings;
 mod types;
 
-use clap::{crate_authors, crate_description, crate_name, crate_version, load_yaml, value_t_or_exit};
 use futures::channel::mpsc::channel;
 use futures::{Stream, StreamExt};
+use lazy_static::*;
+use settings::Settings;
 use std::io::BufRead;
 use std::time::Duration;
 use types::Website;
@@ -28,22 +30,22 @@ fn stdin(threads: usize) -> impl Stream<Item = String> {
 }
 
 #[tokio::main]
-async fn process_domains(threads: usize, timeout: u64, quiet: bool) -> (u64, u64) {
+async fn process_domains(s: &'static Settings) -> (u64, u64) {
     let client = reqwest::Client::builder()
-        .timeout(Duration::from_secs(timeout))
+        .timeout(Duration::from_secs(s.timeout))
         .build()
         .unwrap();
 
-    let statuses = stdin(threads)
+    let statuses = stdin(s.threads)
         .map(|x| {
             let client = &client;
 
             async move {
                 let website = Website::from(&x[..]);
-                return website.get_status(client, quiet).await;
+                return website.get_status(client, s.quiet).await;
             }
         })
-        .buffer_unordered(threads);
+        .buffer_unordered(s.threads);
 
     let count: (u64, u64) = statuses
         .fold((0, 0), |acc, s| async move {
@@ -64,22 +66,13 @@ fn process_result(total: u64, available: u64) {
 fn main() {
     human_panic::setup_panic!();
 
-    let args_yaml = load_yaml!("args.yml");
+    lazy_static! {
+        static ref SETTINGS: Settings = argh::from_env();
+    }
 
-    let matches = clap::App::from_yaml(args_yaml)
-        .name(crate_name!())
-        .version(crate_version!())
-        .author(crate_authors!())
-        .about(crate_description!())
-        .get_matches();
+    let count = process_domains(&SETTINGS);
 
-    let threads = value_t_or_exit!(matches.value_of("threads"), usize);
-    let timeout = value_t_or_exit!(matches.value_of("timeout"), u64);
-    let quiet = matches.is_present("quiet");
-
-    let count = process_domains(threads, timeout, quiet);
-
-    if !quiet {
+    if !SETTINGS.quiet {
         process_result(count.0, count.1);
     }
 }
