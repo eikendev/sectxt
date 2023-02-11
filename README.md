@@ -7,7 +7,7 @@
 </div>
 
 <p align="center">
-	<a href="https://github.com/eikendev/sectxt/actions"><img alt="Build status" src="https://img.shields.io/github/workflow/status/eikendev/sectxt/Main"/></a>&nbsp;
+	<a href="https://github.com/eikendev/sectxt/actions"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/eikendev/sectxt/main.yml?branch=main"/></a>&nbsp;
 	<a href="https://github.com/eikendev/sectxt/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/eikendev/sectxt"/></a>&nbsp;
 	<a href="https://crates.io/crates/sectxt"><img alt="Version" src="https://img.shields.io/crates/v/sectxt"/></a>&nbsp;
 	<a href="https://crates.io/crates/sectxt"><img alt="Downloads" src="https://img.shields.io/crates/d/sectxt"/></a>&nbsp;
