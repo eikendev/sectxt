@@ -11,7 +11,7 @@ jobs:
       - name: Run tests
         run: make test
       - name: Publish (dry run)
-        run: -
+        run: |
           cargo publish --dry-run -p sectxtlib
           cargo publish --dry-run -p sectxt
       - name: Publish
