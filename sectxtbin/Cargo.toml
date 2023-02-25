@@ -1,0 +1,23 @@
+[package]
+name = "sectxt"
+version = "0.0.11"
+authors = ["eikendev"]
+edition = "2018"
+description = "A tool for working with security.txt files"
+homepage = "https://github.com/eikendev/sectxt"
+repository = "https://github.com/eikendev/sectxt.git"
+readme = "README.md"
+license = "ISC"
+
+[dependencies]
+sectxtlib = { path = "../sectxtlib", version = "0.0.11" }
+futures = ">=0.3.8"
+reqwest = ">=0.11"
+human-panic = "1.0.3"
+argh = "0.1.8"
+lazy_static = "1.4.0"
+anyhow = "1.0.69"
+
+[dependencies.tokio]
+version = "1"
+features = ["rt-multi-thread", "macros"]

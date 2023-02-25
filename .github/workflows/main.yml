@@ -11,6 +11,7 @@ jobs:
       - name: Run tests
         run: make test
       - name: Publish (dry run)
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }} # Only publish for tagged commits.
         run: |
           cargo publish --dry-run -p sectxtlib
           cargo publish --dry-run -p sectxt
