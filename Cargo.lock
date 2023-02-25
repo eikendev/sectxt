@@ -27,6 +27,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.69"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "224afbd727c3d6e4b90103ece64b8d1b67fbb1973b1046c2281eed3f3803f800"
+
+[[package]]
 name = "argh"
 version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -830,17 +836,25 @@ dependencies = [
 name = "sectxt"
 version = "0.0.11"
 dependencies = [
+ "anyhow",
  "argh",
- "chrono",
  "futures",
  "human-panic",
- "iref",
  "lazy_static",
+ "reqwest",
+ "sectxtlib",
+ "tokio",
+]
+
+[[package]]
+name = "sectxtlib"
+version = "0.0.1"
+dependencies = [
+ "chrono",
+ "iref",
  "nom",
  "oxilangtag",
- "reqwest",
  "thiserror",
- "tokio",
 ]
 
 [[package]]

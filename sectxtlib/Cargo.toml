@@ -1,0 +1,17 @@
+[package]
+name = "sectxtlib"
+version = "0.0.1"
+authors = ["eikendev"]
+edition = "2018"
+description = "A library for working with security.txt files"
+homepage = "https://github.com/eikendev/sectxt"
+repository = "https://github.com/eikendev/sectxt.git"
+readme = "README.md"
+license = "ISC"
+
+[dependencies]
+chrono = ">=0.4.10"
+iref = ">=1.1"
+nom = ">=5.1.2"
+oxilangtag = ">=0.1.0"
+thiserror = ">=1.0"

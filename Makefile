@@ -1,3 +1,7 @@
+.PHONY: build
+build:
+	cargo build --all
+
 .PHONY: test
 test:
 	cargo fmt -- --check

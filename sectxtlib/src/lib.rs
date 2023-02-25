@@ -1,10 +1,9 @@
 mod parsers;
 mod types;
 
-pub use super::types::{Field, SecurityTxt};
-
 pub use parsers::body_parser;
 pub use types::ParseError;
+pub use types::{Field, SecurityTxt};
 
 #[cfg(test)]
 mod tests {
