@@ -17,7 +17,7 @@ mod tests {
 
     #[test]
     fn test_contact() {
-        let file = format!("Contact: {}\n", URL);
+        let file = format!("Contact: {URL}\n");
         let sec = SecurityTxt {
             fields: vec![Field::Contact(IriBuf::new(URL).unwrap())],
             expires_pos: None,
@@ -29,7 +29,7 @@ mod tests {
 
     #[test]
     fn test_comment() {
-        let file = format!("# this is a comment\n#\nContact: {}\n#\n", URL);
+        let file = format!("# this is a comment\n#\nContact: {URL}\n#\n");
         let sec = SecurityTxt {
             fields: vec![Field::Contact(IriBuf::new(URL).unwrap())],
             expires_pos: None,
@@ -41,7 +41,7 @@ mod tests {
 
     #[test]
     fn test_newlines() {
-        let file = format!("\n\n\nContact: {}\n\n\n", URL);
+        let file = format!("\n\n\nContact: {URL}\n\n\n");
         let sec = SecurityTxt {
             fields: vec![Field::Contact(IriBuf::new(URL).unwrap())],
             expires_pos: None,
@@ -53,7 +53,7 @@ mod tests {
 
     #[test]
     fn test_acknowledgements() {
-        let file = format!("Contact: {}\nAcknowledgments: {}\n", URL, URL);
+        let file = format!("Contact: {URL}\nAcknowledgments: {URL}\n");
         let sec = SecurityTxt {
             fields: vec![
                 Field::Contact(IriBuf::new(URL).unwrap()),
@@ -68,21 +68,21 @@ mod tests {
 
     #[test]
     fn test_missing_contact() {
-        let file = format!("Acknowledgments: {}\n", URL);
+        let file = format!("Acknowledgments: {URL}\n");
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Err(ParseError::IllegalField));
     }
 
     #[test]
     fn test_trailing_content() {
-        let file = format!("Contact: {}\nfoo", URL);
+        let file = format!("Contact: {URL}\nfoo");
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Err(ParseError::Malformed));
     }
 
     #[test]
     fn test_preferred_languages() {
-        let file = format!("Contact: {}\nPreferred-Languages: en\n", URL);
+        let file = format!("Contact: {URL}\nPreferred-Languages: en\n");
         let sec = SecurityTxt {
             fields: vec![
                 Field::Contact(IriBuf::new(URL).unwrap()),
@@ -101,12 +101,11 @@ mod tests {
             "\
             -----BEGIN PGP SIGNED MESSAGE-----\n\
             Hash: SHA256\n\n\
-            Contact: {}\n\
+            Contact: {URL}\n\
             -----BEGIN PGP SIGNATURE-----\n\
             Version: GnuPG v2.2\n\n\
             abcdefABCDEF/+==\n\
-            -----END PGP SIGNATURE-----\n",
-            URL
+            -----END PGP SIGNATURE-----\n"
         );
         let sec = SecurityTxt {
             fields: vec![Field::Contact(IriBuf::new(URL).unwrap())],
