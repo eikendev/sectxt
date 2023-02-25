@@ -990,7 +990,7 @@ dependencies = [
 
 [[package]]
 name = "sectxtlib"
-version = "0.0.1"
+version = "0.0.11"
 dependencies = [
  "chrono",
  "iref",

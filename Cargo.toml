@@ -12,7 +12,7 @@ license = "ISC"
 [workspace]
 
 [dependencies]
-sectxtlib = { path = "sectxtlib", version = "0.0.1" }
+sectxtlib = { path = "sectxtlib", version = "0.0.11" }
 futures = ">=0.3.8"
 reqwest = ">=0.11"
 human-panic = "1.0.3"
