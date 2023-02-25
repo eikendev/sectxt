@@ -61,8 +61,8 @@ impl From<&str> for Website {
         Website {
             domain: s.to_owned(),
             urls: vec![
-                format!("https://{}/.well-known/security.txt", s),
-                format!("https://{}/security.txt", s),
+                format!("https://{s}/.well-known/security.txt"),
+                format!("https://{s}/security.txt"),
             ],
         }
     }

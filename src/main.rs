@@ -59,7 +59,7 @@ async fn process_domains(s: &'static Settings) -> (u64, u64) {
 }
 
 fn process_result(total: u64, available: u64) {
-    println!("{}/{}", available, total);
+    println!("{available}/{total}");
 }
 
 fn main() {
