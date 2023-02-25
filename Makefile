@@ -17,4 +17,5 @@ setup:
 
 .PHONY: publish
 publish:
-	cargo publish
+	cargo publish -p sectxtlib
+	cargo publish -p sectxt
