@@ -1,5 +1,7 @@
+use reqwest::{Error, Response};
 use sectxtlib::SecurityTxt;
 use std::convert::TryFrom;
+use tracing::info;
 
 pub struct Status {
     pub domain: String,
@@ -11,57 +13,62 @@ pub struct Website {
     pub urls: Vec<String>,
 }
 
-async fn is_securitytxt(r: reqwest::Response) -> bool {
-    if r.status() == reqwest::StatusCode::OK {
-        if let Some(content_type) = r.headers().get("Content-Type") {
-            let value: &str = match content_type.to_str() {
-                Ok(text) => text,
-                _ => return false,
-            };
+async fn is_securitytxt(res: Result<Response, Error>) -> anyhow::Result<SecurityTxt> {
+    match res {
+        Ok(resp) => {
+            if resp.status() == reqwest::StatusCode::OK {
+                if let Some(content_type) = resp.headers().get("Content-Type") {
+                    let value: &str = match content_type.to_str() {
+                        Ok(text) => text,
+                        _ => anyhow::bail!("error parsing HTTP body"),
+                    };
 
-            if value.starts_with("text/plain") && value.contains("charset=utf-8") {
-                if let Ok(s) = r.text().await {
-                    return SecurityTxt::try_from(&s[..]).is_ok();
+                    if value.starts_with("text/plain") && value.contains("charset=utf-8") {
+                        if let Ok(s) = resp.text().await {
+                            Ok(SecurityTxt::try_from(&s[..])?)
+                        } else {
+                            anyhow::bail!("error parsing HTTP body");
+                        }
+                    } else {
+                        anyhow::bail!("invalid HTTP content type");
+                    }
+                } else {
+                    anyhow::bail!("HTTP content type not specified");
                 }
+            } else {
+                anyhow::bail!("HTTP status code not OK");
             }
         }
+        _ => anyhow::bail!("HTTP request failed"),
     }
-
-    false
 }
 
 impl Website {
     pub async fn get_status(self, client: &reqwest::Client, quiet: bool) -> Status {
-        let not_available = Status {
-            domain: self.domain.to_owned(),
-            available: false,
-        };
-
         for url in self.urls {
             let response = client.get(&url[..]).send().await;
 
-            match response {
-                Ok(r) => {
-                    if is_securitytxt(r).await {
-                        println!("{}", self.domain);
+            match is_securitytxt(response).await {
+                Ok(_) => {
+                    info!(self.domain, "OK");
 
-                        return Status {
-                            domain: self.domain,
-                            available: true,
-                        };
-                    }
-
-                    return not_available;
+                    return Status {
+                        domain: self.domain,
+                        available: true,
+                    };
                 }
-                Err(e) => {
+                Err(_) => {
                     if !quiet {
-                        eprintln!("{}: HTTP request failed: {}", self.domain, e)
+                        info!(self.domain, "ERR");
                     }
                 }
             }
         }
 
-        not_available
+        Status {
+            domain: self.domain,
+            available: false,
+        }
     }
 }
 

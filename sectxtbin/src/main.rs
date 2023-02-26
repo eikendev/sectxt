@@ -7,6 +7,8 @@ use lazy_static::*;
 use settings::Settings;
 use std::io::BufRead;
 use std::time::Duration;
+use tracing_subscriber::prelude::*;
+use tracing_subscriber::{fmt, EnvFilter};
 use types::Website;
 
 fn stdin(threads: usize) -> impl Stream<Item = String> {
@@ -58,8 +60,27 @@ async fn process_domains(s: &'static Settings) -> (u64, u64) {
     count
 }
 
-fn process_result(total: u64, available: u64) {
+fn process_stats(total: u64, available: u64) {
     println!("{available}/{total}");
+}
+
+fn setup_logger() {
+    let format_layer = fmt::layer()
+        .with_level(true)
+        .with_target(false)
+        .with_thread_ids(false)
+        .with_thread_names(false)
+        .without_time()
+        .json();
+
+    let filter_layer = EnvFilter::try_from_default_env()
+        .or_else(|_| EnvFilter::try_new("info"))
+        .unwrap();
+
+    tracing_subscriber::registry()
+        .with(filter_layer)
+        .with(format_layer)
+        .init();
 }
 
 fn main() {
@@ -69,9 +90,11 @@ fn main() {
         static ref SETTINGS: Settings = argh::from_env();
     }
 
+    setup_logger();
+
     let count = process_domains(&SETTINGS);
 
     if !SETTINGS.quiet {
-        process_result(count.0, count.1);
+        process_stats(count.0, count.1);
     }
 }
