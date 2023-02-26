@@ -15,6 +15,7 @@ mod tests {
     use std::convert::TryFrom;
 
     const URL: &str = "https://securitytxt.org/";
+    const INSECURE_URL: &str = "http://securitytxt.org/";
     const EXPIRES: &str = "2345-01-01T08:19:03.000Z";
 
     fn expires_dt() -> DateTime<Utc> {
@@ -115,6 +116,13 @@ mod tests {
         let file = format!("Contact: {URL}\nExpires: {EXPIRES}\nExpires: {EXPIRES}\n");
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Err(ParseError::ExpiresFieldMultiple));
+    }
+
+    #[test]
+    fn test_insecure_http() {
+        let file = format!("Contact: {INSECURE_URL}\nExpires: {EXPIRES}\n");
+
+        assert_eq!(SecurityTxt::try_from(&file[..]), Err(ParseError::InsecureHTTP));
     }
 
     #[test]

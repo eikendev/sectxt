@@ -24,6 +24,8 @@ pub enum ParseError {
     ExpiresFieldMultiple,
     #[error("preferred languages field may only be specified once")]
     PreferredLanguagesFieldMultiple,
+    #[error("links must use HTTPS")]
+    InsecureHTTP,
 }
 
 macro_rules! impl_from {
@@ -83,6 +85,24 @@ pub enum Field {
     Extension(String, String),
 }
 
+pub trait IriBufVisitor {
+    fn visit(&self) -> Option<&IriBuf>;
+}
+
+impl IriBufVisitor for Field {
+    fn visit(&self) -> Option<&IriBuf> {
+        match self {
+            Field::Acknowledgments(iribuf)
+            | Field::Canonical(iribuf)
+            | Field::Contact(iribuf)
+            | Field::Encryption(iribuf)
+            | Field::Hiring(iribuf)
+            | Field::Policy(iribuf) => Some(iribuf),
+            Field::Expires(_) | Field::PreferredLanguages(_) | Field::Extension(_, _) => None,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct SecurityTxt {
     pub(crate) fields: Vec<Field>,
@@ -129,7 +149,9 @@ impl SecurityTxt {
             }
         }
 
-        // TODO: https MUST be used for web URLs.
+        if fields.iter().filter_map(|x| x.visit()).any(|x| x.scheme() == "http") {
+            return Err(ParseError::InsecureHTTP);
+        }
 
         Ok(SecurityTxt { fields })
     }
