@@ -6,6 +6,7 @@ edition = "2018"
 description = "A library for working with security.txt files"
 homepage = "https://github.com/eikendev/sectxt"
 repository = "https://github.com/eikendev/sectxt.git"
+readme = "README.md"
 license = "ISC"
 
 [dependencies]
