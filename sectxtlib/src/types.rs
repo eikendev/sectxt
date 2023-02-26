@@ -19,6 +19,8 @@ pub enum ParseError {
     #[error("expires field must be specified")]
     ExpiresFieldMissing,
     #[error("expires field may only be specified once")]
+    ExpiresFieldExpired,
+    #[error("expires field specifies time in the past")]
     ExpiresFieldMultiple,
     #[error("preferred languages field may only be specified once")]
     PreferredLanguagesFieldMultiple,
@@ -84,19 +86,11 @@ pub enum Field {
 #[derive(Debug, PartialEq)]
 pub struct SecurityTxt {
     pub(crate) fields: Vec<Field>,
-    pub expires_pos: Option<usize>,
-    pub planguages_pos: Option<usize>,
 }
 
 macro_rules! count_variant {
     ( $variant:path, $vector:expr ) => {
         $vector.iter().filter(|x| matches!(x, $variant(_))).count()
-    };
-}
-
-macro_rules! get_variant_position {
-    ( $variant:path, $vector:expr ) => {
-        $vector.iter().position(|x| matches!(x, $variant(_)))
     };
 }
 
@@ -120,24 +114,24 @@ impl SecurityTxt {
             return Err(ParseError::PreferredLanguagesFieldMultiple);
         }
 
-        let expires_pos = get_variant_position!(Field::Expires, fields);
-        let planguages_pos = get_variant_position!(Field::PreferredLanguages, fields);
+        // We checked above that this field exists.
+        let expires = fields.iter().find(|x| matches!(x, Field::Expires(_))).unwrap();
+        if let Field::Expires(time) = expires {
+            if time < &Utc::now() {
+                return Err(ParseError::ExpiresFieldExpired);
+            }
+        }
 
-        if let Some(pos) = planguages_pos {
-            if let Field::PreferredLanguages(languages) = &fields[pos] {
-                if languages.is_empty() {
-                    return Err(ParseError::IllegalField);
-                }
+        let planguages = fields.iter().find(|x| matches!(x, Field::PreferredLanguages(_)));
+        if let Some(Field::PreferredLanguages(languages)) = planguages {
+            if languages.is_empty() {
+                return Err(ParseError::IllegalField);
             }
         }
 
         // TODO: https MUST be used for web URLs.
 
-        Ok(SecurityTxt {
-            fields,
-            expires_pos,
-            planguages_pos,
-        })
+        Ok(SecurityTxt { fields })
     }
 }
 
