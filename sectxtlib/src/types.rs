@@ -1,5 +1,5 @@
 use super::parsers::body_parser;
-use chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, Utc};
 use iref::IriBuf;
 use oxilangtag::{LanguageTag, LanguageTagParseError};
 use std::convert::TryFrom;
@@ -16,6 +16,8 @@ pub enum ParseError {
     IllegalField,
     #[error("contact field must be specified")]
     ContactFieldMissing,
+    #[error("expires field must be specified")]
+    ExpiresFieldMissing,
     #[error("expires field may only be specified once")]
     ExpiresFieldMultiple,
     #[error("preferred languages field may only be specified once")]
@@ -57,7 +59,7 @@ impl TryInto<Field> for RawField<'_> {
             "canonical" => Ok(Field::Canonical(IriBuf::new(self.value)?)),
             "contact" => Ok(Field::Contact(IriBuf::new(self.value)?)),
             "encryption" => Ok(Field::Encryption(IriBuf::new(self.value)?)),
-            "expires" => Ok(Field::Expires(DateTime::parse_from_str(self.value, "")?)),
+            "expires" => Ok(Field::Expires(self.value.parse()?)),
             "hiring" => Ok(Field::Hiring(IriBuf::new(self.value)?)),
             "policy" => Ok(Field::Policy(IriBuf::new(self.value)?)),
             "preferred-languages" => Ok(Field::PreferredLanguages(parse_preferred_languages(self.value)?)),
@@ -72,7 +74,7 @@ pub enum Field {
     Canonical(IriBuf),
     Contact(IriBuf),
     Encryption(IriBuf),
-    Expires(DateTime<FixedOffset>),
+    Expires(DateTime<Utc>),
     Hiring(IriBuf),
     Policy(IriBuf),
     PreferredLanguages(Vec<LanguageTag<String>>),
@@ -106,6 +108,9 @@ impl SecurityTxt {
         }
 
         let count = count_variant!(Field::Expires, fields);
+        if count == 0 {
+            return Err(ParseError::ExpiresFieldMissing);
+        }
         if count > 1 {
             return Err(ParseError::ExpiresFieldMultiple);
         }
