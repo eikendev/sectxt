@@ -14,6 +14,12 @@ pub enum ParseError {
     InvalidDatetime(#[from] chrono::format::ParseError),
     #[error("field specified in an illegal way")]
     IllegalField,
+    #[error("contact field must be specified")]
+    ContactFieldMissing,
+    #[error("expires field may only be specified once")]
+    ExpiresFieldMultiple,
+    #[error("preferred languages field may only be specified once")]
+    PreferredLanguagesFieldMultiple,
 }
 
 macro_rules! impl_from {
@@ -96,17 +102,17 @@ impl SecurityTxt {
     pub fn new(fields: Vec<Field>) -> Result<Self, ParseError> {
         let count = count_variant!(Field::Contact, fields);
         if count == 0 {
-            return Err(ParseError::IllegalField);
+            return Err(ParseError::ContactFieldMissing);
         }
 
         let count = count_variant!(Field::Expires, fields);
         if count > 1 {
-            return Err(ParseError::IllegalField);
+            return Err(ParseError::ExpiresFieldMultiple);
         }
 
         let count = count_variant!(Field::PreferredLanguages, fields);
         if count > 1 {
-            return Err(ParseError::IllegalField);
+            return Err(ParseError::PreferredLanguagesFieldMultiple);
         }
 
         let expires_pos = get_variant_position!(Field::Expires, fields);
