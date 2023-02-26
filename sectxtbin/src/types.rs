@@ -27,6 +27,11 @@ async fn is_securitytxt(r: reqwest::Response) -> bool {
 
 impl Website {
     pub async fn get_status(self, client: &reqwest::Client, quiet: bool) -> Status {
+        let not_available = Status {
+            domain: self.domain.to_owned(),
+            available: false,
+        };
+
         for url in self.urls {
             let response = client.get(&url[..]).send().await;
 
@@ -40,6 +45,8 @@ impl Website {
                             available: true,
                         };
                     }
+
+                    return not_available;
                 }
                 Err(e) => {
                     if !quiet {
@@ -49,10 +56,7 @@ impl Website {
             }
         }
 
-        Status {
-            domain: self.domain,
-            available: false,
-        }
+        not_available
     }
 }
 
