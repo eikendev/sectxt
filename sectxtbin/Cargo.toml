@@ -1,6 +1,6 @@
 [package]
 name = "sectxt"
-version = "0.0.11"
+version = "0.1.0"
 authors = ["eikendev"]
 edition = "2021"
 description = "A tool for working with security.txt files"
@@ -10,7 +10,7 @@ readme = "README.md"
 license = "ISC"
 
 [dependencies]
-sectxtlib = { path = "../sectxtlib", version = "0.0.11" }
+sectxtlib = { path = "../sectxtlib", version = "0.1.0" }
 anyhow = ">=1.0"
 argh = ">=0.1"
 env_logger = ">=0.10"
