@@ -14,7 +14,12 @@ pub struct Website {
 async fn is_securitytxt(r: reqwest::Response) -> bool {
     if r.status() == reqwest::StatusCode::OK {
         if let Some(content_type) = r.headers().get("Content-Type") {
-            if content_type.to_str().unwrap().starts_with("text/plain") {
+            let value: &str = match content_type.to_str() {
+                Ok(text) => text,
+                _ => return false,
+            };
+
+            if value.starts_with("text/plain") && value.contains("charset=utf-8") {
                 if let Ok(s) = r.text().await {
                     return SecurityTxt::try_from(&s[..]).is_ok();
                 }
