@@ -5,16 +5,24 @@ jobs:
     name: Test and publish
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Install dependencies
         run: make setup
+
       - name: Run tests
         run: make test
+
+      - name: Build
+        run: make build
+
       - name: Publish (dry run)
         if: ${{ !startsWith(github.ref, 'refs/tags/v') }} # Only publish for tagged commits.
         run: |
           cargo publish --dry-run -p sectxtlib
-          cargo publish --dry-run -p sectxt
+          #cargo publish --dry-run -p sectxt # Fails if sectxtlib is not actually published
+
       - name: Publish
         if: startsWith(github.ref, 'refs/tags/v') # Only publish for tagged commits.
         env:
