@@ -117,7 +117,7 @@ macro_rules! get_variant {
 }
 
 impl SecurityTxt {
-    fn check_contacts_fields(fields: Vec<&Field>) -> Result<(), ParseError> {
+    fn check_contact_fields(fields: Vec<&Field>) -> Result<(), ParseError> {
         if fields.is_empty() {
             return Err(ParseError::ContactFieldMissing);
         }
@@ -134,8 +134,8 @@ impl SecurityTxt {
         }
 
         // We checked above that this field exists.
-        let expires = match fields.get(0) {
-            Some(Field::Expires(time)) => time.to_owned(),
+        let expires = match fields[0] {
+            Field::Expires(time) => time.to_owned(),
             _ => {
                 panic!("illegal expires field")
             }
@@ -176,8 +176,8 @@ impl SecurityTxt {
     }
 
     pub fn new(fields: Vec<Field>) -> Result<Self, ParseError> {
-        let contacts_fields: Vec<&Field> = get_variant!(Field::Contact, fields);
-        Self::check_contacts_fields(contacts_fields)?;
+        let contact_fields: Vec<&Field> = get_variant!(Field::Contact, fields);
+        Self::check_contact_fields(contact_fields)?;
 
         let expires_fields: Vec<&Field> = get_variant!(Field::Expires, fields);
         let expires = Self::check_expires(expires_fields)?;

@@ -1,3 +1,4 @@
+use anyhow::Context;
 use reqwest::{Error, Response};
 use sectxtlib::SecurityTxt;
 use std::convert::TryFrom;
@@ -13,33 +14,24 @@ pub struct Website {
     pub urls: Vec<String>,
 }
 
-async fn is_securitytxt(res: Result<Response, Error>) -> anyhow::Result<SecurityTxt> {
-    match res {
-        Ok(resp) => {
-            if resp.status() == reqwest::StatusCode::OK {
-                if let Some(content_type) = resp.headers().get("Content-Type") {
-                    let value: &str = match content_type.to_str() {
-                        Ok(text) => text,
-                        _ => anyhow::bail!("error parsing HTTP body"),
-                    };
+async fn is_securitytxt(result: Result<Response, Error>) -> anyhow::Result<SecurityTxt> {
+    let resp = result.context("HTTP request failed")?;
 
-                    if value.starts_with("text/plain") && value.contains("charset=utf-8") {
-                        if let Ok(s) = resp.text().await {
-                            Ok(SecurityTxt::try_from(&s[..])?)
-                        } else {
-                            anyhow::bail!("error parsing HTTP body");
-                        }
-                    } else {
-                        anyhow::bail!("invalid HTTP content type");
-                    }
-                } else {
-                    anyhow::bail!("HTTP content type not specified");
-                }
-            } else {
-                anyhow::bail!("HTTP status code not OK");
-            }
+    if resp.status() != reqwest::StatusCode::OK {
+        anyhow::bail!("HTTP status code not OK");
+    }
+
+    if let Some(content_type) = resp.headers().get("Content-Type") {
+        let value: &str = content_type.to_str().context("error parsing HTTP body")?;
+
+        if value.starts_with("text/plain") && value.contains("charset=utf-8") {
+            let s = resp.text().await.context("error parsing HTTP body")?;
+            Ok(SecurityTxt::try_from(&s[..])?)
+        } else {
+            anyhow::bail!("invalid HTTP content type");
         }
-        _ => anyhow::bail!("HTTP request failed"),
+    } else {
+        anyhow::bail!("HTTP content type not specified");
     }
 }
 
