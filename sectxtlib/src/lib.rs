@@ -27,6 +27,8 @@ mod tests {
         let file = format!("Contact: {URL}\nExpires: {EXPIRES}\n");
         let sec = SecurityTxt {
             fields: vec![Field::Contact(IriBuf::new(URL).unwrap()), Field::Expires(expires_dt())],
+            expires: expires_dt(),
+            preferred_languages: None,
         };
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
@@ -37,6 +39,8 @@ mod tests {
         let file = format!("# this is a comment\n#\nContact: {URL}\nExpires: {EXPIRES}\n#\n");
         let sec = SecurityTxt {
             fields: vec![Field::Contact(IriBuf::new(URL).unwrap()), Field::Expires(expires_dt())],
+            expires: expires_dt(),
+            preferred_languages: None,
         };
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
@@ -47,6 +51,8 @@ mod tests {
         let file = format!("\n\n\nContact: {URL}\nExpires: {EXPIRES}\n\n\n");
         let sec = SecurityTxt {
             fields: vec![Field::Contact(IriBuf::new(URL).unwrap()), Field::Expires(expires_dt())],
+            expires: expires_dt(),
+            preferred_languages: None,
         };
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
@@ -61,6 +67,8 @@ mod tests {
                 Field::Expires(expires_dt()),
                 Field::Acknowledgments(IriBuf::new(URL).unwrap()),
             ],
+            expires: expires_dt(),
+            preferred_languages: None,
         };
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
@@ -96,6 +104,8 @@ mod tests {
                 Field::Expires(expires_dt()),
                 Field::PreferredLanguages(vec![LanguageTag::parse_and_normalize("en").unwrap()]),
             ],
+            expires: expires_dt(),
+            preferred_languages: Some("en".to_owned()),
         };
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
@@ -140,6 +150,8 @@ mod tests {
         );
         let sec = SecurityTxt {
             fields: vec![Field::Contact(IriBuf::new(URL).unwrap()), Field::Expires(expires_dt())],
+            expires: expires_dt(),
+            preferred_languages: None,
         };
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));

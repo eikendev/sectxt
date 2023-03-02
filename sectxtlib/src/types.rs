@@ -72,7 +72,7 @@ impl TryInto<Field> for RawField<'_> {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Field {
     Acknowledgments(IriBuf),
     Canonical(IriBuf),
@@ -85,7 +85,7 @@ pub enum Field {
     Extension(String, String),
 }
 
-pub trait IriBufVisitor {
+trait IriBufVisitor {
     fn visit(&self) -> Option<&IriBuf>;
 }
 
@@ -105,55 +105,97 @@ impl IriBufVisitor for Field {
 
 #[derive(Debug, PartialEq)]
 pub struct SecurityTxt {
-    pub(crate) fields: Vec<Field>,
+    pub fields: Vec<Field>,
+    pub expires: DateTime<Utc>,
+    pub preferred_languages: Option<String>,
 }
 
-macro_rules! count_variant {
+macro_rules! get_variant {
     ( $variant:path, $vector:expr ) => {
-        $vector.iter().filter(|x| matches!(x, $variant(_))).count()
+        $vector.iter().filter(|x| matches!(x, $variant(_))).collect()
     };
 }
 
 impl SecurityTxt {
-    pub fn new(fields: Vec<Field>) -> Result<Self, ParseError> {
-        let count = count_variant!(Field::Contact, fields);
-        if count == 0 {
+    fn check_contacts_fields(fields: Vec<&Field>) -> Result<(), ParseError> {
+        if fields.is_empty() {
             return Err(ParseError::ContactFieldMissing);
         }
 
-        let count = count_variant!(Field::Expires, fields);
-        if count == 0 {
+        Ok(())
+    }
+
+    fn check_expires(fields: Vec<&Field>) -> Result<DateTime<Utc>, ParseError> {
+        if fields.is_empty() {
             return Err(ParseError::ExpiresFieldMissing);
         }
-        if count > 1 {
+        if fields.len() > 1 {
             return Err(ParseError::ExpiresFieldMultiple);
         }
 
-        let count = count_variant!(Field::PreferredLanguages, fields);
-        if count > 1 {
+        // We checked above that this field exists.
+        let expires = match fields.get(0) {
+            Some(Field::Expires(time)) => time.to_owned(),
+            _ => {
+                panic!("illegal expires field")
+            }
+        };
+        if expires < Utc::now() {
+            return Err(ParseError::ExpiresFieldExpired);
+        }
+
+        Ok(expires)
+    }
+
+    fn check_preferred_languages(fields: Vec<&Field>) -> Result<Option<String>, ParseError> {
+        if fields.len() > 1 {
             return Err(ParseError::PreferredLanguagesFieldMultiple);
         }
 
-        // We checked above that this field exists.
-        let expires = fields.iter().find(|x| matches!(x, Field::Expires(_))).unwrap();
-        if let Field::Expires(time) = expires {
-            if time < &Utc::now() {
-                return Err(ParseError::ExpiresFieldExpired);
-            }
-        }
+        let preferred_languages: Option<String> = match fields.get(0) {
+            Some(&Field::PreferredLanguages(languages)) => {
+                if languages.is_empty() {
+                    return Err(ParseError::IllegalField);
+                }
 
-        let planguages = fields.iter().find(|x| matches!(x, Field::PreferredLanguages(_)));
-        if let Some(Field::PreferredLanguages(languages)) = planguages {
-            if languages.is_empty() {
-                return Err(ParseError::IllegalField);
+                let languages: Vec<String> = languages.iter().map(|x| x.to_string()).collect();
+                Some(languages.join(", "))
             }
-        }
+            _ => None,
+        };
 
+        Ok(preferred_languages)
+    }
+
+    fn check_insecure_http(fields: &[Field]) -> Result<(), ParseError> {
         if fields.iter().filter_map(|x| x.visit()).any(|x| x.scheme() == "http") {
             return Err(ParseError::InsecureHTTP);
         }
 
-        Ok(SecurityTxt { fields })
+        Ok(())
+    }
+
+    pub fn new(fields: Vec<Field>) -> Result<Self, ParseError> {
+        let contacts_fields: Vec<&Field> = get_variant!(Field::Contact, fields);
+        Self::check_contacts_fields(contacts_fields)?;
+
+        let expires_fields: Vec<&Field> = get_variant!(Field::Expires, fields);
+        let expires = Self::check_expires(expires_fields)?;
+
+        let preferred_languages_fields: Vec<&Field> = get_variant!(Field::PreferredLanguages, fields);
+        let preferred_languages = Self::check_preferred_languages(preferred_languages_fields)?;
+
+        Self::check_insecure_http(&fields)?;
+
+        Ok(SecurityTxt {
+            fields,
+            expires,
+            preferred_languages,
+        })
+    }
+
+    pub fn get_contacts(&self) -> Vec<&Field> {
+        get_variant!(Field::Contact, self.fields)
     }
 }
 

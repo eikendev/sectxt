@@ -49,17 +49,17 @@ impl Website {
             let response = client.get(&url[..]).send().await;
 
             match is_securitytxt(response).await {
-                Ok(_) => {
-                    info!(self.domain, "OK");
+                Ok(txt) => {
+                    info!(domain = self.domain, len = txt.fields.len(), status = "OK");
 
                     return Status {
                         domain: self.domain,
                         available: true,
                     };
                 }
-                Err(_) => {
+                Err(e) => {
                     if !quiet {
-                        info!(self.domain, "ERR");
+                        info!(domain = self.domain, error = e.to_string(), status = "ERR");
                     }
                 }
             }
