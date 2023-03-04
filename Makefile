@@ -3,14 +3,15 @@ FUZZ_DIR := ./fuzz
 
 .PHONY: build
 build:
-	cargo build --all
+	cargo build -p sectxtlib
+	cargo build -p sectxt
 
 .PHONY: test
 test:
-	cd sectxtbin; cargo fmt -- --check
 	cd sectxtlib; cargo fmt -- --check
-	cd sectxtbin; cargo clippy --all-targets --all-features -- -D warnings
+	cd sectxtbin; cargo fmt -- --check
 	cd sectxtlib; cargo clippy --all-targets --all-features -- -D warnings
+	cd sectxtbin; cargo clippy --all-targets --all-features -- -D warnings
 	cargo test --verbose
 
 .PHONY: setup
