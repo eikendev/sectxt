@@ -16,10 +16,10 @@ test:
 .PHONY: setup
 setup:
 	rustup update
-	rustup component add afl
 	rustup component add clippy
 	rustup component add rustfmt
 	rustup show
+	cargo install afl
 
 .PHONY: publish
 publish:
