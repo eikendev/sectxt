@@ -1,4 +1,4 @@
-use super::types::RawField;
+use super::raw_field::RawField;
 
 use nom::{
     branch::alt,

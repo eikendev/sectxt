@@ -1,9 +1,12 @@
+mod field;
+mod parse_error;
 mod parsers;
-mod types;
+mod raw_field;
+mod securitytxt;
 
-pub use parsers::body_parser;
-pub use types::ParseError;
-pub use types::{Field, SecurityTxt};
+pub use field::Field;
+pub use parse_error::ParseError;
+pub use securitytxt::SecurityTxt;
 
 #[cfg(test)]
 mod tests {
