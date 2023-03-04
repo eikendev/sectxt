@@ -1,8 +1,8 @@
-use anyhow::Context;
-use reqwest::{Error, Response};
+use anyhow::{Context, Result};
 use sectxtlib::SecurityTxt;
 use std::convert::TryFrom;
 use tracing::info;
+use url::Url;
 
 pub struct Status {
     pub domain: String,
@@ -14,7 +14,7 @@ pub struct Website {
     pub urls: Vec<String>,
 }
 
-async fn is_securitytxt(result: Result<Response, Error>) -> anyhow::Result<SecurityTxt> {
+async fn is_securitytxt(result: Result<reqwest::Response, reqwest::Error>) -> Result<SecurityTxt> {
     let resp = result.context("HTTP request failed")?;
 
     if resp.status() != reqwest::StatusCode::OK {
@@ -64,14 +64,19 @@ impl Website {
     }
 }
 
-impl From<&str> for Website {
-    fn from(s: &str) -> Self {
-        Website {
-            domain: s.to_owned(),
+impl TryFrom<&str> for Website {
+    type Error = anyhow::Error;
+
+    fn try_from(s: &str) -> Result<Self> {
+        let url = Url::parse(s).context("unable to parse input as URL")?;
+        let host = url.host_str().context("cannot parse hostname in input")?;
+
+        Ok(Website {
+            domain: host.to_owned(),
             urls: vec![
-                format!("https://{s}/.well-known/security.txt"),
-                format!("https://{s}/security.txt"),
+                format!("https://{host}/.well-known/security.txt"),
+                format!("https://{host}/security.txt"),
             ],
-        }
+        })
     }
 }
