@@ -1,3 +1,6 @@
+TARGET_DIR := ./target
+FUZZ_DIR := ./fuzz
+
 .PHONY: build
 build:
 	cargo build --all
@@ -21,3 +24,8 @@ setup:
 publish:
 	cargo publish -p sectxtlib
 	cargo publish -p sectxt
+
+.PHONY: fuzz
+fuzz:
+	cargo afl build -p sectxtfuzz
+	AFL_SKIP_CPUFREQ=1 cargo afl fuzz -i $(FUZZ_DIR)/_examples -o $(FUZZ_DIR)/afl $(TARGET_DIR)/debug/sectxtfuzz

@@ -1,0 +1,14 @@
+[package]
+name = "sectxtfuzz"
+version = "0.1.2"
+authors = ["eikendev"]
+edition = "2021"
+description = "A fuzzer for sectxtlib"
+homepage = "https://github.com/eikendev/sectxt"
+repository = "https://github.com/eikendev/sectxt.git"
+readme = "README.md"
+license = "ISC"
+
+[dependencies]
+afl = "*"
+sectxtlib = { path = "../sectxtlib", version = "0.1.2" }
