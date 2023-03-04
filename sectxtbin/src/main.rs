@@ -1,18 +1,20 @@
+mod network;
 mod settings;
-mod types;
+mod status;
+mod website;
 
 use futures::channel::mpsc::channel;
 use futures::{Stream, StreamExt};
 use lazy_static::*;
 use reqwest::Client;
 use settings::Settings;
+use status::Status;
 use std::io::BufRead;
 use std::time::Duration;
 use tracing::info;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{fmt, EnvFilter};
-use types::Status;
-use types::Website;
+use website::Website;
 
 fn stdin(threads: usize) -> impl Stream<Item = String> {
     let (mut tx, rx) = channel(threads);
@@ -47,10 +49,10 @@ async fn process_line(line: String, client: &Client, quiet: bool) -> Status {
                 info!(domain = &line, error = e.to_string(), status = "ERR");
             }
 
-            return Status {
+            Status {
                 domain: line,
                 available: false,
-            };
+            }
         }
     }
 }
@@ -65,7 +67,7 @@ async fn process_domains(s: &'static Settings) -> (u64, u64) {
     let statuses = stdin(s.threads)
         .map(|input| {
             let client = &client;
-            async move { process_line(input, &client, s.quiet).await }
+            async move { process_line(input, client, s.quiet).await }
         })
         .buffer_unordered(s.threads);
 
