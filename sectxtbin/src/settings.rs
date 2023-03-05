@@ -14,4 +14,8 @@ pub struct Settings {
     /// only print domains for which the run was successful
     #[argh(switch, short = 'q')]
     pub quiet: bool,
+
+    /// print statistics before exit
+    #[argh(switch)]
+    pub print_stats: bool,
 }

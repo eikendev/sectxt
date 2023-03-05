@@ -83,10 +83,6 @@ async fn process_domains(s: &'static Settings) -> (u64, u64) {
     count
 }
 
-fn process_stats(total: u64, available: u64) {
-    println!("{available}/{total}");
-}
-
 fn setup_logger() {
     let format_layer = fmt::layer()
         .with_level(true)
@@ -117,7 +113,7 @@ fn main() {
 
     let count = process_domains(&SETTINGS);
 
-    if !SETTINGS.quiet {
-        process_stats(count.0, count.1);
+    if SETTINGS.print_stats {
+        println!("{}/{}", count.0, count.1);
     }
 }
