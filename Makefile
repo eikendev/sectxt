@@ -8,10 +8,10 @@ build:
 
 .PHONY: test
 test:
-	cd sectxtlib; cargo fmt -- --check
-	cd sectxtbin; cargo fmt -- --check
-	cd sectxtlib; cargo clippy --all-targets --all-features -- -D warnings
-	cd sectxtbin; cargo clippy --all-targets --all-features -- -D warnings
+	cargo fmt -p sectxtlib --check
+	cargo fmt -p sectxt --check
+	cargo clippy -p sectxtlib --all-features -- -D warnings
+	cargo clippy -p sectxt --all-features -- -D warnings
 	cargo test --verbose
 
 .PHONY: setup
