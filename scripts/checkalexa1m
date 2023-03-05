@@ -5,7 +5,7 @@ set -o errtrace
 
 SOURCEURL='http://s3.amazonaws.com/alexa-static/top-1m.csv.zip'
 
-cargo build --release
+cargo build --release -p sectxt
 
 tmp_directory="$(mktemp -d)"
 

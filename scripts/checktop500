@@ -5,7 +5,7 @@ set -o errtrace
 
 SOURCEURL='https://moz.com/top-500/download/?table=top500Domains'
 
-cargo build --release
+cargo build --release -p sectxt
 
 tmp_directory="$(mktemp -d)"
 
