@@ -33,7 +33,9 @@ impl Website {
                     }
                     Err(err) => {
                         // Location exists but file is not parsable.
-                        info!(domain = self.domain, error = err.to_string(), status = "ERR");
+                        if !quiet {
+                            info!(domain = self.domain, error = err.to_string(), status = "ERR");
+                        }
                         return self.make_status(false);
                     }
                 },
