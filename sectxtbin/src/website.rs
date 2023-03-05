@@ -1,4 +1,4 @@
-use super::network::is_securitytxt;
+use super::network::{is_file_present, is_securitytxt};
 use super::status::Status;
 use anyhow::{Context, Result};
 use std::convert::TryFrom;
@@ -11,31 +11,47 @@ pub struct Website {
 }
 
 impl Website {
-    pub async fn get_status(self, client: &reqwest::Client, quiet: bool) -> Status {
-        for url in self.urls {
+    fn make_status(&self, available: bool) -> Status {
+        Status {
+            domain: self.domain.to_owned(),
+            available,
+        }
+    }
+
+    pub async fn get_status(&self, client: &reqwest::Client, quiet: bool) -> Status {
+        let mut first_error: Option<anyhow::Error> = None;
+
+        for url in &self.urls {
             let response = client.get(&url[..]).send().await;
 
-            match is_securitytxt(response).await {
-                Ok(txt) => {
-                    info!(domain = self.domain, len = txt.fields.len(), status = "OK");
-
-                    return Status {
-                        domain: self.domain,
-                        available: true,
-                    };
-                }
-                Err(e) => {
-                    if !quiet {
-                        info!(domain = self.domain, error = e.to_string(), status = "ERR");
+            match is_file_present(response) {
+                Ok(response) => match is_securitytxt(response).await {
+                    Ok(txt) => {
+                        // Location exists and file is parsable.
+                        info!(domain = self.domain, len = txt.fields.len(), status = "OK");
+                        return self.make_status(true);
+                    }
+                    Err(err) => {
+                        // Location exists but file is not parsable.
+                        info!(domain = self.domain, error = err.to_string(), status = "ERR");
+                        return self.make_status(false);
+                    }
+                },
+                Err(err) => {
+                    // Location does not exists.
+                    if first_error.is_none() {
+                        first_error = Some(err);
                     }
                 }
             }
         }
 
-        Status {
-            domain: self.domain,
-            available: false,
+        if !quiet {
+            let err = first_error.unwrap(); // self.urls is never empty
+            info!(domain = self.domain, error = err.to_string(), status = "ERR");
         }
+
+        self.make_status(false)
     }
 }
 
