@@ -1,33 +1,33 @@
 use chrono::{DateTime, Utc};
-use iref::IriBuf;
+use iri_string::types::IriString;
 use oxilangtag::LanguageTag;
 
 #[derive(Debug, PartialEq)]
 pub enum Field {
-    Acknowledgments(IriBuf),
-    Canonical(IriBuf),
-    Contact(IriBuf),
-    Encryption(IriBuf),
+    Acknowledgments(IriString),
+    Canonical(IriString),
+    Contact(IriString),
+    Encryption(IriString),
     Expires(DateTime<Utc>),
-    Hiring(IriBuf),
-    Policy(IriBuf),
+    Hiring(IriString),
+    Policy(IriString),
     PreferredLanguages(Vec<LanguageTag<String>>),
     Extension(String, String),
 }
 
-pub trait IriBufVisitor {
-    fn visit(&self) -> Option<&IriBuf>;
+pub trait IriStringVisitor {
+    fn visit(&self) -> Option<&IriString>;
 }
 
-impl IriBufVisitor for Field {
-    fn visit(&self) -> Option<&IriBuf> {
+impl IriStringVisitor for Field {
+    fn visit(&self) -> Option<&IriString> {
         match self {
-            Field::Acknowledgments(iribuf)
-            | Field::Canonical(iribuf)
-            | Field::Contact(iribuf)
-            | Field::Encryption(iribuf)
-            | Field::Hiring(iribuf)
-            | Field::Policy(iribuf) => Some(iribuf),
+            Field::Acknowledgments(iri_string)
+            | Field::Canonical(iri_string)
+            | Field::Contact(iri_string)
+            | Field::Encryption(iri_string)
+            | Field::Hiring(iri_string)
+            | Field::Policy(iri_string) => Some(iri_string),
             Field::Expires(_) | Field::PreferredLanguages(_) | Field::Extension(_, _) => None,
         }
     }

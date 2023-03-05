@@ -1,5 +1,5 @@
 use super::field::Field;
-use super::field::IriBufVisitor;
+use super::field::IriStringVisitor;
 use super::parse_error::ParseError;
 use super::parsers::body_parser;
 use chrono::{DateTime, Utc};
@@ -70,7 +70,11 @@ impl SecurityTxt {
     }
 
     fn check_insecure_http(fields: &[Field]) -> Result<(), ParseError> {
-        if fields.iter().filter_map(|x| x.visit()).any(|x| x.scheme() == "http") {
+        if fields
+            .iter()
+            .filter_map(|x| x.visit())
+            .any(|x| x.scheme_str() == "http")
+        {
             return Err(ParseError::InsecureHTTP);
         }
 

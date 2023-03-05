@@ -1,6 +1,6 @@
 use super::field::Field;
 use super::ParseError;
-use iref::IriBuf;
+use iri_string::types::IriString;
 use oxilangtag::{LanguageTag, LanguageTagParseError};
 use std::convert::TryInto;
 
@@ -21,13 +21,13 @@ impl TryInto<Field> for RawField<'_> {
         let name = self.name.to_lowercase();
 
         match &name[..] {
-            "acknowledgments" => Ok(Field::Acknowledgments(IriBuf::new(self.value)?)),
-            "canonical" => Ok(Field::Canonical(IriBuf::new(self.value)?)),
-            "contact" => Ok(Field::Contact(IriBuf::new(self.value)?)),
-            "encryption" => Ok(Field::Encryption(IriBuf::new(self.value)?)),
+            "acknowledgments" => Ok(Field::Acknowledgments(self.value.parse::<IriString>()?)),
+            "canonical" => Ok(Field::Canonical(self.value.parse::<IriString>()?)),
+            "contact" => Ok(Field::Contact(self.value.parse::<IriString>()?)),
+            "encryption" => Ok(Field::Encryption(self.value.parse::<IriString>()?)),
             "expires" => Ok(Field::Expires(self.value.parse()?)),
-            "hiring" => Ok(Field::Hiring(IriBuf::new(self.value)?)),
-            "policy" => Ok(Field::Policy(IriBuf::new(self.value)?)),
+            "hiring" => Ok(Field::Hiring(self.value.parse::<IriString>()?)),
+            "policy" => Ok(Field::Policy(self.value.parse::<IriString>()?)),
             "preferred-languages" => Ok(Field::PreferredLanguages(parse_preferred_languages(self.value)?)),
             _ => Ok(Field::Extension(name, self.value.to_owned())),
         }
