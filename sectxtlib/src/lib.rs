@@ -1,39 +1,40 @@
-mod field;
+mod fields;
 mod parse_error;
 mod parsers;
 mod raw_field;
 mod securitytxt;
 
-pub use field::Field;
 pub use parse_error::ParseError;
 pub use securitytxt::SecurityTxt;
 
 #[cfg(test)]
 mod tests {
+    use crate::fields::{AcknowledgmentsField, ContactField, ExpiresField, PreferredLanguagesField};
+
     use super::*;
 
-    use chrono::{DateTime, Utc};
-    use iri_string::types::IriString;
-    use oxilangtag::LanguageTag;
-    use std::convert::TryFrom;
+    use std::{convert::TryFrom, vec};
 
     const URL: &str = "https://securitytxt.org/";
     const INSECURE_URL: &str = "http://securitytxt.org/";
     const EXPIRES: &str = "2345-01-01T08:19:03.000Z";
 
-    fn expires_dt() -> DateTime<Utc> {
-        EXPIRES.parse().unwrap()
+    fn expires_dt() -> ExpiresField {
+        ExpiresField::new(EXPIRES).unwrap()
     }
 
     #[test]
     fn test_contact_and_expires() {
         let file = format!("Contact: {URL}\nExpires: {EXPIRES}\n");
         let sec = SecurityTxt {
-            fields: vec![
-                Field::Contact(URL.parse::<IriString>().unwrap()),
-                Field::Expires(expires_dt()),
-            ],
+            acknowledgments: vec![],
+            canonical: vec![],
+            contact: vec![ContactField::new(URL).unwrap()],
+            encryption: vec![],
             expires: expires_dt(),
+            extension: vec![],
+            hiring: vec![],
+            policy: vec![],
             preferred_languages: None,
         };
 
@@ -44,11 +45,14 @@ mod tests {
     fn test_comment() {
         let file = format!("# this is a comment\n#\nContact: {URL}\nExpires: {EXPIRES}\n#\n");
         let sec = SecurityTxt {
-            fields: vec![
-                Field::Contact(URL.parse::<IriString>().unwrap()),
-                Field::Expires(expires_dt()),
-            ],
+            acknowledgments: vec![],
+            canonical: vec![],
+            contact: vec![ContactField::new(URL).unwrap()],
+            encryption: vec![],
             expires: expires_dt(),
+            extension: vec![],
+            hiring: vec![],
+            policy: vec![],
             preferred_languages: None,
         };
 
@@ -59,11 +63,14 @@ mod tests {
     fn test_newlines() {
         let file = format!("\n\n\nContact: {URL}\nExpires: {EXPIRES}\n\n\n");
         let sec = SecurityTxt {
-            fields: vec![
-                Field::Contact(URL.parse::<IriString>().unwrap()),
-                Field::Expires(expires_dt()),
-            ],
+            acknowledgments: vec![],
+            canonical: vec![],
+            contact: vec![ContactField::new(URL).unwrap()],
+            encryption: vec![],
             expires: expires_dt(),
+            extension: vec![],
+            hiring: vec![],
+            policy: vec![],
             preferred_languages: None,
         };
 
@@ -74,12 +81,14 @@ mod tests {
     fn test_acknowledgements() {
         let file = format!("Contact: {URL}\nExpires: {EXPIRES}\nAcknowledgments: {URL}\n");
         let sec = SecurityTxt {
-            fields: vec![
-                Field::Contact(URL.parse::<IriString>().unwrap()),
-                Field::Expires(expires_dt()),
-                Field::Acknowledgments(URL.parse::<IriString>().unwrap()),
-            ],
+            acknowledgments: vec![AcknowledgmentsField::new(URL).unwrap()],
+            canonical: vec![],
+            contact: vec![ContactField::new(URL).unwrap()],
+            encryption: vec![],
             expires: expires_dt(),
+            extension: vec![],
+            hiring: vec![],
+            policy: vec![],
             preferred_languages: None,
         };
 
@@ -111,13 +120,15 @@ mod tests {
     fn test_preferred_languages() {
         let file = format!("Contact: {URL}\nExpires: {EXPIRES}\nPreferred-Languages: en\n");
         let sec = SecurityTxt {
-            fields: vec![
-                Field::Contact(URL.parse::<IriString>().unwrap()),
-                Field::Expires(expires_dt()),
-                Field::PreferredLanguages(vec![LanguageTag::parse_and_normalize("en").unwrap()]),
-            ],
+            acknowledgments: vec![],
+            canonical: vec![],
+            contact: vec![ContactField::new(URL).unwrap()],
+            encryption: vec![],
             expires: expires_dt(),
-            preferred_languages: Some("en".to_owned()),
+            extension: vec![],
+            hiring: vec![],
+            policy: vec![],
+            preferred_languages: Some(PreferredLanguagesField::new("en").unwrap()),
         };
 
         assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
@@ -161,11 +172,14 @@ mod tests {
             -----END PGP SIGNATURE-----\n"
         );
         let sec = SecurityTxt {
-            fields: vec![
-                Field::Contact(URL.parse::<IriString>().unwrap()),
-                Field::Expires(expires_dt()),
-            ],
+            acknowledgments: vec![],
+            canonical: vec![],
+            contact: vec![ContactField::new(URL).unwrap()],
+            encryption: vec![],
             expires: expires_dt(),
+            extension: vec![],
+            hiring: vec![],
+            policy: vec![],
             preferred_languages: None,
         };
 

@@ -10,7 +10,7 @@ use nom::{
     IResult,
 };
 
-pub fn body_parser(i: &str) -> IResult<&str, Vec<Option<RawField>>> {
+pub(crate) fn body_parser(i: &str) -> IResult<&str, Vec<Option<RawField>>> {
     all_consuming(alt((signed_parser, unsigned_parser)))(i)
 }
 
