@@ -2,9 +2,13 @@ TARGET_DIR := ./target
 FUZZ_DIR := ./fuzz
 
 .PHONY: build
-build:
+build: docs
 	cargo build -p sectxtlib
 	cargo build -p sectxt
+
+.PHONY: docs
+docs:
+	cargo doc -p sectxtlib
 
 .PHONY: test
 test:

@@ -4,13 +4,16 @@ mod parsers;
 mod raw_field;
 mod securitytxt;
 
+pub use fields::{
+    AcknowledgmentsField, CanonicalField, ContactField, EncryptionField, ExpiresField, ExtensionField, HiringField,
+    PolicyField, PreferredLanguagesField,
+};
 pub use parse_error::ParseError;
 pub use securitytxt::SecurityTxt;
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::fields::{AcknowledgmentsField, ContactField, ExpiresField, PreferredLanguagesField};
 
     const URL: &str = "https://securitytxt.org/";
     const INSECURE_URL: &str = "http://securitytxt.org/";

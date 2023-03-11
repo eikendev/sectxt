@@ -21,6 +21,7 @@ macro_rules! IriStringImpl {
 /// An [Acknowledgments field](https://www.rfc-editor.org/rfc/rfc9116#name-acknowledgments) links to a page where security researchers are recognized
 #[derive(Debug, PartialEq)]
 pub struct AcknowledgmentsField {
+    /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
 }
 IriStringImpl!(AcknowledgmentsField);
@@ -28,6 +29,7 @@ IriStringImpl!(AcknowledgmentsField);
 /// A [Canonical field](https://www.rfc-editor.org/rfc/rfc9116#name-canonical) contains a canonical URI for the security.txt file
 #[derive(Debug, PartialEq)]
 pub struct CanonicalField {
+    /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
 }
 IriStringImpl!(CanonicalField);
@@ -35,6 +37,7 @@ IriStringImpl!(CanonicalField);
 /// A [Contact field](https://www.rfc-editor.org/rfc/rfc9116#name-contact) contains contact information to use for reporting vulnerabilities
 #[derive(Debug, PartialEq)]
 pub struct ContactField {
+    /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
 }
 IriStringImpl!(ContactField);
@@ -42,6 +45,7 @@ IriStringImpl!(ContactField);
 /// An [Encryption field](https://www.rfc-editor.org/rfc/rfc9116#name-encryption) links to a key to be used for encrypted communication
 #[derive(Debug, PartialEq)]
 pub struct EncryptionField {
+    /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
 }
 IriStringImpl!(EncryptionField);
@@ -49,6 +53,7 @@ IriStringImpl!(EncryptionField);
 /// The [Expires field](https://www.rfc-editor.org/rfc/rfc9116#name-expires) represents the date and time after which the security.txt file is considered stale
 #[derive(Debug, PartialEq)]
 pub struct ExpiresField {
+    /// The date and time from which the security.txt file is considered stale
     pub datetime: DateTime<Utc>,
 }
 
@@ -74,6 +79,7 @@ impl PartialOrd for ExpiresField {
 /// A [Hiring field](https://www.rfc-editor.org/rfc/rfc9116#name-hiring) links to the vendor's security-related job positions
 #[derive(Debug, PartialEq)]
 pub struct HiringField {
+    /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
 }
 IriStringImpl!(HiringField);
@@ -81,6 +87,7 @@ IriStringImpl!(HiringField);
 /// A [Policy field](https://www.rfc-editor.org/rfc/rfc9116#name-policy) links to the security policy page
 #[derive(Debug, PartialEq)]
 pub struct PolicyField {
+    /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
 }
 IriStringImpl!(PolicyField);
@@ -88,6 +95,7 @@ IriStringImpl!(PolicyField);
 /// The [Preferred-Languages field](https://www.rfc-editor.org/rfc/rfc9116#name-preferred-languages) lists the preferred languages for security reports
 #[derive(Debug, PartialEq)]
 pub struct PreferredLanguagesField {
+    /// The set of preferred languages according to [RFC 5646](https://www.rfc-editor.org/rfc/rfc5646)
     pub languages: Vec<LanguageTag<String>>,
 }
 
@@ -111,12 +119,14 @@ impl PreferredLanguagesField {
 /// This feature accommodates [section 2.4 on Extensibility](https://www.rfc-editor.org/rfc/rfc9116#name-extensibility) in the specification.
 #[derive(Debug, PartialEq)]
 pub struct ExtensionField {
-    pub key: String,
+    /// Name of the extension field
+    pub name: String,
+    /// Value of the extension field
     pub value: String,
 }
 
 impl ExtensionField {
-    pub(crate) fn new(key: String, value: String) -> Result<Self, ParseError> {
-        Ok(Self { key, value })
+    pub(crate) fn new(name: String, value: String) -> Result<Self, ParseError> {
+        Ok(Self { name, value })
     }
 }
