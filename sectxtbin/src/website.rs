@@ -28,7 +28,8 @@ impl Website {
                 Ok(response) => match is_securitytxt(response).await {
                     Ok(txt) => {
                         // Location exists and file is parsable.
-                        info!(domain = self.domain, len = txt.contact.len(), status = "OK");
+                        let expires = txt.expires.datetime.format("%Y-%m-%d").to_string();
+                        info!(domain = self.domain, expires = expires, status = "OK");
                         return self.make_status(true);
                     }
                     Err(err) => {

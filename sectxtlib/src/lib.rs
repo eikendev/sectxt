@@ -14,6 +14,7 @@ pub use securitytxt::SecurityTxt;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::{fs, path::PathBuf};
 
     const URL: &str = "https://securitytxt.org/";
     const INSECURE_URL: &str = "http://securitytxt.org/";
@@ -21,6 +22,12 @@ mod tests {
 
     fn expires_dt() -> ExpiresField {
         ExpiresField::new(EXPIRES).unwrap()
+    }
+
+    fn get_tests_dir(category: &str) -> PathBuf {
+        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        d.push(format!("resources/test/{category}"));
+        d
     }
 
     #[test]
@@ -61,7 +68,7 @@ mod tests {
 
     #[test]
     fn test_newlines() {
-        let file = format!("\n\n\nContact: {URL}\nExpires: {EXPIRES}\n\n\n");
+        let file = format!("\n\n\nContact: {URL}\n\n\nExpires: {EXPIRES}\n\n\n");
         let sec = SecurityTxt {
             acknowledgments: vec![],
             canonical: vec![],
@@ -118,7 +125,7 @@ mod tests {
 
     #[test]
     fn test_preferred_languages() {
-        let file = format!("Contact: {URL}\nExpires: {EXPIRES}\nPreferred-Languages: en\n");
+        let file = format!("Contact: {URL}\nExpires: {EXPIRES}\nPreferred-Languages: en, fr\n");
         let sec = SecurityTxt {
             acknowledgments: vec![],
             canonical: vec![],
@@ -128,7 +135,7 @@ mod tests {
             extension: vec![],
             hiring: vec![],
             policy: vec![],
-            preferred_languages: Some(PreferredLanguagesField::new("en").unwrap()),
+            preferred_languages: Some(PreferredLanguagesField::new("en, fr").unwrap()),
         };
 
         assert_eq!(file.parse::<SecurityTxt>(), Ok(sec));
@@ -184,5 +191,16 @@ mod tests {
         };
 
         assert_eq!(file.parse(), Ok(sec));
+    }
+
+    #[test]
+    fn test_category_valid() {
+        let paths = get_tests_dir("valid").read_dir().unwrap();
+
+        for path in paths {
+            let buf = fs::read_to_string(path.unwrap().path()).unwrap();
+            let txt = buf.parse::<SecurityTxt>();
+            assert_eq!(txt.is_ok(), true);
+        }
     }
 }
