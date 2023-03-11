@@ -9,11 +9,8 @@ pub use securitytxt::SecurityTxt;
 
 #[cfg(test)]
 mod tests {
-    use crate::fields::{AcknowledgmentsField, ContactField, ExpiresField, PreferredLanguagesField};
-
     use super::*;
-
-    use std::{convert::TryFrom, vec};
+    use crate::fields::{AcknowledgmentsField, ContactField, ExpiresField, PreferredLanguagesField};
 
     const URL: &str = "https://securitytxt.org/";
     const INSECURE_URL: &str = "http://securitytxt.org/";
@@ -38,7 +35,7 @@ mod tests {
             preferred_languages: None,
         };
 
-        assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
+        assert_eq!(file.parse(), Ok(sec));
     }
 
     #[test]
@@ -56,7 +53,7 @@ mod tests {
             preferred_languages: None,
         };
 
-        assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
+        assert_eq!(file.parse(), Ok(sec));
     }
 
     #[test]
@@ -74,7 +71,7 @@ mod tests {
             preferred_languages: None,
         };
 
-        assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
+        assert_eq!(file.parse(), Ok(sec));
     }
 
     #[test]
@@ -92,28 +89,28 @@ mod tests {
             preferred_languages: None,
         };
 
-        assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
+        assert_eq!(file.parse(), Ok(sec));
     }
 
     #[test]
     fn test_contact_missing() {
         let file = format!("Expires: {EXPIRES}\n");
 
-        assert_eq!(SecurityTxt::try_from(&file[..]), Err(ParseError::ContactFieldMissing));
+        assert_eq!(file.parse::<SecurityTxt>(), Err(ParseError::ContactFieldMissing));
     }
 
     #[test]
     fn test_expires_missing() {
         let file = format!("Contact: {URL}\n");
 
-        assert_eq!(SecurityTxt::try_from(&file[..]), Err(ParseError::ExpiresFieldMissing));
+        assert_eq!(file.parse::<SecurityTxt>(), Err(ParseError::ExpiresFieldMissing));
     }
 
     #[test]
     fn test_trailing_content() {
         let file = format!("Contact: {URL}\nExpires: {EXPIRES}\nfoo");
 
-        assert_eq!(SecurityTxt::try_from(&file[..]), Err(ParseError::Malformed));
+        assert_eq!(file.parse::<SecurityTxt>(), Err(ParseError::Malformed));
     }
 
     #[test]
@@ -131,7 +128,7 @@ mod tests {
             preferred_languages: Some(PreferredLanguagesField::new("en").unwrap()),
         };
 
-        assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
+        assert_eq!(file.parse::<SecurityTxt>(), Ok(sec));
     }
 
     #[test]
@@ -139,7 +136,7 @@ mod tests {
         let file = format!("Contact: {URL}\nExpires: {EXPIRES}\nPreferred-Languages: en\nPreferred-Languages: de\n");
 
         assert_eq!(
-            SecurityTxt::try_from(&file[..]),
+            file.parse::<SecurityTxt>(),
             Err(ParseError::PreferredLanguagesFieldMultiple)
         );
     }
@@ -148,14 +145,14 @@ mod tests {
     fn test_expires_multiple() {
         let file = format!("Contact: {URL}\nExpires: {EXPIRES}\nExpires: {EXPIRES}\n");
 
-        assert_eq!(SecurityTxt::try_from(&file[..]), Err(ParseError::ExpiresFieldMultiple));
+        assert_eq!(file.parse::<SecurityTxt>(), Err(ParseError::ExpiresFieldMultiple));
     }
 
     #[test]
     fn test_insecure_http() {
         let file = format!("Contact: {INSECURE_URL}\nExpires: {EXPIRES}\n");
 
-        assert_eq!(SecurityTxt::try_from(&file[..]), Err(ParseError::InsecureHTTP));
+        assert_eq!(file.parse::<SecurityTxt>(), Err(ParseError::InsecureHTTP));
     }
 
     #[test]
@@ -183,6 +180,6 @@ mod tests {
             preferred_languages: None,
         };
 
-        assert_eq!(SecurityTxt::try_from(&file[..]), Ok(sec));
+        assert_eq!(file.parse(), Ok(sec));
     }
 }

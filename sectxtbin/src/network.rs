@@ -1,7 +1,6 @@
 use anyhow::{Context, Result};
 use reqwest::Response;
 use sectxtlib::SecurityTxt;
-use std::convert::TryFrom;
 
 pub fn is_file_present(result: Result<reqwest::Response, reqwest::Error>) -> Result<Response> {
     let resp = result.context("HTTP request failed")?;
@@ -19,7 +18,7 @@ pub async fn is_securitytxt(resp: Response) -> Result<SecurityTxt> {
 
         if value.starts_with("text/plain") && value.contains("charset=utf-8") {
             let s = resp.text().await.context("error parsing HTTP body")?;
-            Ok(SecurityTxt::try_from(&s[..])?)
+            Ok(s.parse()?)
         } else {
             anyhow::bail!("invalid HTTP content type");
         }

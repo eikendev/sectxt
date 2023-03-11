@@ -5,18 +5,37 @@ use super::fields::{
 use super::parse_error::ParseError;
 use super::parsers::body_parser;
 use super::raw_field::RawField;
-use std::convert::TryFrom;
+use std::cmp::Ordering;
+use std::str::FromStr;
 
+/// A representation of an [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116) security.txt file
 #[derive(Debug, PartialEq)]
 pub struct SecurityTxt {
+    /// A collection of "Acknowledgments" fields
     pub acknowledgments: Vec<AcknowledgmentsField>,
+
+    /// A collection of "Canonical" fields
     pub canonical: Vec<CanonicalField>,
+
+    /// A collection of "Contact" fields
     pub contact: Vec<ContactField>,
+
+    /// A collection of "Encryption" fields
     pub encryption: Vec<EncryptionField>,
+
+    /// The "Expires" field
     pub expires: ExpiresField,
+
+    /// A collection of "Extension" fields
     pub extension: Vec<ExtensionField>,
+
+    /// A collection of "Hiring" fields
     pub hiring: Vec<HiringField>,
+
+    /// A collection of "Policy" fields
     pub policy: Vec<PolicyField>,
+
+    /// The "Preferred-Languages" field, if available
     pub preferred_languages: Option<PreferredLanguagesField>,
 }
 
@@ -84,22 +103,34 @@ impl SecurityTxt {
             canonical,
             contact,
             encryption,
-            expires: expires.pop().unwrap(),
+            expires: expires.pop().unwrap(), // checked in Self::validate_expires()
             extension,
             hiring,
             policy,
             preferred_languages: preferred_languages.pop(),
         })
     }
+
+    /// Parses a security.txt file as a string according to [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116).
+    pub fn parse(text: &str) -> Result<Self, ParseError> {
+        let (_, fields) = body_parser(text)?;
+        let fields: Vec<RawField> = fields.into_iter().flatten().collect();
+        SecurityTxt::new(fields)
+    }
 }
 
-impl TryFrom<&str> for SecurityTxt {
-    type Error = ParseError;
+impl PartialOrd for SecurityTxt {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.expires.partial_cmp(&other.expires)
+    }
+}
 
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        let (_, fields) = body_parser(value)?;
-        let fields: Vec<RawField> = fields.into_iter().flatten().collect();
+impl FromStr for SecurityTxt {
+    type Err = ParseError;
 
-        SecurityTxt::new(fields)
+    #[inline]
+    fn from_str(text: &str) -> Result<Self, Self::Err> {
+        Self::parse(text)
     }
 }
