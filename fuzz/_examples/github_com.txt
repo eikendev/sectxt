@@ -1,7 +1,0 @@
-Contact: https://hackerone.com/github
-Acknowledgments: https://hackerone.com/github/hacktivity
-Preferred-Languages: en
-Canonical: https://github.com/.well-known/security.txt
-Policy: https://bounty.github.com
-Hiring: https://github.com/about/careers
-Expires: 2023-04-03T13:08:00z
