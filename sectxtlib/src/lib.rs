@@ -3,6 +3,7 @@ mod parse_error;
 mod parsers;
 mod raw_field;
 mod securitytxt;
+mod securitytxt_options;
 
 pub use fields::{
     AcknowledgmentsField, CanonicalField, ContactField, EncryptionField, ExpiresField, ExtensionField, HiringField,
@@ -14,14 +15,19 @@ pub use securitytxt::SecurityTxt;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::{DateTime, Utc};
     use std::{fs, path::PathBuf};
 
     const URL: &str = "https://securitytxt.org/";
     const INSECURE_URL: &str = "http://securitytxt.org/";
-    const EXPIRES: &str = "2345-01-01T08:19:03.000Z";
+    const EXPIRES: &str = "2030-01-01T08:19:03.000Z";
+
+    fn now_dt() -> DateTime<Utc> {
+        DateTime::parse_from_rfc3339("2023-01-01T08:19:03.000Z").unwrap().into()
+    }
 
     fn expires_dt() -> ExpiresField {
-        ExpiresField::new(EXPIRES).unwrap()
+        ExpiresField::new(EXPIRES, now_dt()).unwrap()
     }
 
     fn get_tests_dir(category: &str) -> PathBuf {

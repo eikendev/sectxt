@@ -81,10 +81,10 @@ pub struct ExpiresField {
 }
 
 impl ExpiresField {
-    pub(crate) fn new(datetime: &str) -> Result<Self, ParseError> {
+    pub(crate) fn new(datetime: &str, now: DateTime<Utc>) -> Result<Self, ParseError> {
         let datetime: DateTime<Utc> = datetime.parse()?;
 
-        if datetime < Utc::now() {
+        if datetime < now {
             return Err(ParseError::ExpiresFieldExpired);
         }
 

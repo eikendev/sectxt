@@ -1,5 +1,5 @@
 Contact: https://hackerone.com/wordpress
-Expires: 2124-12-31T15:00:00.000Z
+Expires: 2024-12-31T15:00:00.000Z
 Acknowledgments: https://hackerone.com/wordpress/thanks
 Canonical: https://wordpress.org/.well-known/security.txt
 Policy: https://make.wordpress.org/core/handbook/testing/reporting-security-vulnerabilities/

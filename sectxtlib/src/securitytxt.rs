@@ -5,6 +5,7 @@ use super::fields::{
 use super::parse_error::ParseError;
 use super::parsers::body_parser;
 use super::raw_field::RawField;
+use super::securitytxt_options::SecurityTxtOptions;
 use std::cmp::Ordering;
 use std::str::FromStr;
 use valuable::Valuable;
@@ -68,7 +69,7 @@ impl SecurityTxt {
         Ok(())
     }
 
-    pub(crate) fn new(fields: Vec<RawField>) -> Result<Self, ParseError> {
+    pub(crate) fn new(fields: Vec<RawField>, options: &SecurityTxtOptions) -> Result<Self, ParseError> {
         let mut acknowledgments: Vec<AcknowledgmentsField> = vec![];
         let mut canonical: Vec<CanonicalField> = vec![];
         let mut contact: Vec<ContactField> = vec![];
@@ -87,7 +88,7 @@ impl SecurityTxt {
                 "canonical" => canonical.push(CanonicalField::new(field.value)?),
                 "contact" => contact.push(ContactField::new(field.value)?),
                 "encryption" => encryption.push(EncryptionField::new(field.value)?),
-                "expires" => expires.push(ExpiresField::new(field.value)?),
+                "expires" => expires.push(ExpiresField::new(field.value, options.now)?),
                 "hiring" => hiring.push(HiringField::new(field.value)?),
                 "policy" => policy.push(PolicyField::new(field.value)?),
                 "preferred-languages" => preferred_languages.push(PreferredLanguagesField::new(field.value)?),
@@ -114,9 +115,15 @@ impl SecurityTxt {
 
     /// Parses a security.txt file as a string according to [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116).
     pub fn parse(text: &str) -> Result<Self, ParseError> {
+        let options = Default::default();
+        Self::parse_with(text, &options)
+    }
+
+    /// Parses a security.txt file as a string according to [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116).
+    pub fn parse_with(text: &str, options: &SecurityTxtOptions) -> Result<Self, ParseError> {
         let (_, fields) = body_parser(text)?;
         let fields: Vec<RawField> = fields.into_iter().flatten().collect();
-        SecurityTxt::new(fields)
+        Self::new(fields, options)
     }
 }
 
