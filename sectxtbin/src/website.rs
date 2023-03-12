@@ -4,6 +4,7 @@ use anyhow::{Context, Result};
 use std::convert::TryFrom;
 use tracing::info;
 use url::Url;
+use valuable::Valuable;
 
 pub struct Website {
     pub domain: String,
@@ -28,8 +29,7 @@ impl Website {
                 Ok(response) => match is_securitytxt(response).await {
                     Ok(txt) => {
                         // Location exists and file is parsable.
-                        let expires = txt.expires.datetime.format("%Y-%m-%d").to_string();
-                        info!(domain = self.domain, expires = expires, status = "OK");
+                        info!(domain = self.domain, content = txt.as_value(), status = "OK");
                         return self.make_status(true);
                     }
                     Err(err) => {

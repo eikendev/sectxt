@@ -3,17 +3,30 @@ use chrono::{DateTime, Utc};
 use iri_string::types::IriString;
 use oxilangtag::{LanguageTag, LanguageTagParseError};
 use std::cmp::Ordering;
+use valuable::{Valuable, Value, Visit};
 
 macro_rules! IriStringImpl {
     ($structname:ident) => {
         impl $structname {
             pub(crate) fn new(uri: &str) -> Result<Self, ParseError> {
                 let uri = uri.parse::<IriString>()?;
+
                 if uri.scheme_str() == "http" {
                     return Err(ParseError::InsecureHTTP);
                 }
-                Ok(Self { uri })
+
+                let log_value = uri.as_str().to_string();
+
+                Ok(Self { uri, log_value })
             }
+        }
+
+        impl Valuable for $structname {
+            fn as_value(&self) -> Value<'_> {
+                self.log_value.as_value()
+            }
+
+            fn visit(&self, _visit: &mut dyn Visit) {}
         }
     };
 }
@@ -23,6 +36,8 @@ macro_rules! IriStringImpl {
 pub struct AcknowledgmentsField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
+
+    log_value: String,
 }
 IriStringImpl!(AcknowledgmentsField);
 
@@ -31,6 +46,8 @@ IriStringImpl!(AcknowledgmentsField);
 pub struct CanonicalField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
+
+    log_value: String,
 }
 IriStringImpl!(CanonicalField);
 
@@ -39,6 +56,8 @@ IriStringImpl!(CanonicalField);
 pub struct ContactField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
+
+    log_value: String,
 }
 IriStringImpl!(ContactField);
 
@@ -47,6 +66,8 @@ IriStringImpl!(ContactField);
 pub struct EncryptionField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
+
+    log_value: String,
 }
 IriStringImpl!(EncryptionField);
 
@@ -55,17 +76,21 @@ IriStringImpl!(EncryptionField);
 pub struct ExpiresField {
     /// The date and time from which the security.txt file is considered stale
     pub datetime: DateTime<Utc>,
+
+    log_value: String,
 }
 
 impl ExpiresField {
     pub(crate) fn new(datetime: &str) -> Result<Self, ParseError> {
-        let datetime = datetime.parse()?;
+        let datetime: DateTime<Utc> = datetime.parse()?;
 
         if datetime < Utc::now() {
             return Err(ParseError::ExpiresFieldExpired);
         }
 
-        Ok(Self { datetime })
+        let log_value = datetime.to_rfc3339();
+
+        Ok(Self { datetime, log_value })
     }
 }
 
@@ -76,11 +101,21 @@ impl PartialOrd for ExpiresField {
     }
 }
 
+impl Valuable for ExpiresField {
+    fn as_value(&self) -> Value<'_> {
+        self.log_value.as_value()
+    }
+
+    fn visit(&self, _visit: &mut dyn Visit) {}
+}
+
 /// A [Hiring field](https://www.rfc-editor.org/rfc/rfc9116#name-hiring) links to the vendor's security-related job positions
 #[derive(Debug, PartialEq)]
 pub struct HiringField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
+
+    log_value: String,
 }
 IriStringImpl!(HiringField);
 
@@ -89,6 +124,8 @@ IriStringImpl!(HiringField);
 pub struct PolicyField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
+
+    log_value: String,
 }
 IriStringImpl!(PolicyField);
 
@@ -97,6 +134,8 @@ IriStringImpl!(PolicyField);
 pub struct PreferredLanguagesField {
     /// The set of preferred languages according to [RFC 5646](https://www.rfc-editor.org/rfc/rfc5646)
     pub languages: Vec<LanguageTag<String>>,
+
+    log_value: String,
 }
 
 impl PreferredLanguagesField {
@@ -110,14 +149,24 @@ impl PreferredLanguagesField {
             return Err(ParseError::IllegalField);
         }
 
-        Ok(Self { languages })
+        let log_value = languages.join(", ");
+
+        Ok(Self { languages, log_value })
     }
+}
+
+impl Valuable for PreferredLanguagesField {
+    fn as_value(&self) -> Value<'_> {
+        self.log_value.as_value()
+    }
+
+    fn visit(&self, _visit: &mut dyn Visit) {}
 }
 
 /// The "Extension" field acts as a catch-all for any fields not explicitly supported by this library
 ///
 /// This feature accommodates [section 2.4 on Extensibility](https://www.rfc-editor.org/rfc/rfc9116#name-extensibility) in the specification.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Valuable)]
 pub struct ExtensionField {
     /// Name of the extension field
     pub name: String,

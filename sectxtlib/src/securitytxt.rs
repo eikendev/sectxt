@@ -7,9 +7,10 @@ use super::parsers::body_parser;
 use super::raw_field::RawField;
 use std::cmp::Ordering;
 use std::str::FromStr;
+use valuable::Valuable;
 
 /// A representation of an [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116) security.txt file
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Valuable)]
 pub struct SecurityTxt {
     /// A collection of "Acknowledgments" fields
     pub acknowledgments: Vec<AcknowledgmentsField>,
