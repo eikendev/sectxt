@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use reqwest::Response;
-use sectxtlib::SecurityTxt;
+use sectxtlib::{SecurityTxt, SecurityTxtOptions};
 
 pub fn is_file_present(result: Result<reqwest::Response, reqwest::Error>) -> Result<Response> {
     let resp = result.context("HTTP request failed")?;
@@ -12,13 +12,13 @@ pub fn is_file_present(result: Result<reqwest::Response, reqwest::Error>) -> Res
     Ok(resp)
 }
 
-pub async fn is_securitytxt(resp: Response) -> Result<SecurityTxt> {
+pub async fn is_securitytxt(resp: Response, options: &SecurityTxtOptions) -> Result<SecurityTxt> {
     if let Some(content_type) = resp.headers().get("Content-Type") {
         let value: &str = content_type.to_str().context("error parsing HTTP body")?;
 
         if value.starts_with("text/plain") && value.contains("charset=utf-8") {
             let s = resp.text().await.context("error parsing HTTP body")?;
-            Ok(s.parse()?)
+            Ok(SecurityTxt::parse_with(&s, options)?)
         } else {
             anyhow::bail!("invalid HTTP content type");
         }

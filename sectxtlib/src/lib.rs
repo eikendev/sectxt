@@ -11,6 +11,7 @@ pub use fields::{
 };
 pub use parse_error::ParseError;
 pub use securitytxt::SecurityTxt;
+pub use securitytxt_options::SecurityTxtOptions;
 
 #[cfg(test)]
 mod tests {

@@ -7,6 +7,7 @@ use futures::channel::mpsc::channel;
 use futures::{Stream, StreamExt};
 use lazy_static::*;
 use reqwest::Client;
+use sectxtlib::SecurityTxtOptions;
 use settings::Settings;
 use status::Status;
 use std::io::BufRead;
@@ -35,7 +36,7 @@ fn stdin(threads: usize) -> impl Stream<Item = String> {
     rx
 }
 
-async fn process_line(line: String, client: &Client, quiet: bool) -> Status {
+async fn process_line(line: String, client: &Client, options: &SecurityTxtOptions, quiet: bool) -> Status {
     let mut line = line.trim().to_lowercase();
     if !line.starts_with("http") {
         line = format!("https://{line}");
@@ -43,7 +44,7 @@ async fn process_line(line: String, client: &Client, quiet: bool) -> Status {
     let website = Website::try_from(&line[..]);
 
     match website {
-        Ok(website) => website.get_status(client, quiet).await,
+        Ok(website) => website.get_status(client, options, quiet).await,
         Err(e) => {
             if !quiet {
                 info!(domain = &line, error = e.to_string(), status = "ERR");
@@ -64,10 +65,13 @@ async fn process_domains(s: &'static Settings) -> (u64, u64) {
         .build()
         .unwrap();
 
+    let options: SecurityTxtOptions = Default::default();
+
     let statuses = stdin(s.threads)
         .map(|input| {
             let client = &client;
-            async move { process_line(input, client, s.quiet).await }
+            let options = &options;
+            async move { process_line(input, client, options, s.quiet).await }
         })
         .buffer_unordered(s.threads);
 

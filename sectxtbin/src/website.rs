@@ -1,6 +1,7 @@
 use super::network::{is_file_present, is_securitytxt};
 use super::status::Status;
 use anyhow::{Context, Result};
+use sectxtlib::SecurityTxtOptions;
 use std::convert::TryFrom;
 use tracing::info;
 use url::Url;
@@ -19,14 +20,14 @@ impl Website {
         }
     }
 
-    pub async fn get_status(&self, client: &reqwest::Client, quiet: bool) -> Status {
+    pub async fn get_status(&self, client: &reqwest::Client, options: &SecurityTxtOptions, quiet: bool) -> Status {
         let mut first_error: Option<anyhow::Error> = None;
 
         for url in &self.urls {
             let response = client.get(&url[..]).send().await;
 
             match is_file_present(response) {
-                Ok(response) => match is_securitytxt(response).await {
+                Ok(response) => match is_securitytxt(response, options).await {
                     Ok(txt) => {
                         // Location exists and file is parsable.
                         info!(domain = self.domain, content = txt.as_value(), status = "OK");
