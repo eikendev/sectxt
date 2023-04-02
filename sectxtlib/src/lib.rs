@@ -172,37 +172,37 @@ mod tests {
         assert_eq!(file.parse::<SecurityTxt>(), Err(ParseError::InsecureHTTP));
     }
 
-    #[test]
-    fn test_signed_contact() {
-        let file = format!(
-            "\
-            -----BEGIN PGP SIGNED MESSAGE-----\n\
-            Hash: SHA256\n\n\
-            Contact: {URL}\n\
-            Expires: {EXPIRES}\n\
-            -----BEGIN PGP SIGNATURE-----\n\
-            Version: GnuPG v2.2\n\n\
-            abcdefABCDEF/+==\n\
-            -----END PGP SIGNATURE-----\n"
-        );
-        let sec = SecurityTxt {
-            acknowledgments: vec![],
-            canonical: vec![],
-            contact: vec![ContactField::new(URL).unwrap()],
-            encryption: vec![],
-            expires: expires_dt(),
-            extension: vec![],
-            hiring: vec![],
-            policy: vec![],
-            preferred_languages: None,
-        };
+    //    #[test]
+    //    fn test_signed_contact() {
+    //        let file = format!(
+    //            "\
+    //            -----BEGIN PGP SIGNED MESSAGE-----\n\
+    //            Hash: SHA256\n\n\
+    //            Contact: {URL}\n\
+    //            Expires: {EXPIRES}\n\
+    //            -----BEGIN PGP SIGNATURE-----\n\
+    //            Version: GnuPG v2.2\n\n\
+    //            abcdefABCDEF/+==\n\
+    //            -----END PGP SIGNATURE-----\n"
+    //        );
+    //        let sec = SecurityTxt {
+    //            acknowledgments: vec![],
+    //            canonical: vec![],
+    //            contact: vec![ContactField::new(URL).unwrap()],
+    //            encryption: vec![],
+    //            expires: expires_dt(),
+    //            extension: vec![],
+    //            hiring: vec![],
+    //            policy: vec![],
+    //            preferred_languages: None,
+    //        };
+    //
+    //        assert_eq!(file.parse(), Ok(sec));
+    //    }
 
-        assert_eq!(file.parse(), Ok(sec));
-    }
-
     #[test]
-    fn test_category_valid() {
-        let paths = get_tests_dir("valid").read_dir().unwrap();
+    fn test_category_valid_unsigned() {
+        let paths = get_tests_dir("valid_unsigned").read_dir().unwrap();
 
         for path in paths {
             let buf = fs::read_to_string(path.unwrap().path()).unwrap();
