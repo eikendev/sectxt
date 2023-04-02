@@ -19,7 +19,7 @@ test:
 	cargo fmt -p sectxt --check
 	cargo clippy -p sectxtlib --all-features -- -D warnings
 	cargo clippy -p sectxt --all-features -- -D warnings
-	cargo test --verbose
+	cargo test
 
 .PHONY: setup
 setup:

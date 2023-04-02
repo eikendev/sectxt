@@ -210,4 +210,15 @@ mod tests {
             assert_eq!(txt.is_ok(), true);
         }
     }
+
+    #[test]
+    fn test_category_gen_unsigned() {
+        let paths = get_tests_dir("gen_unsigned").read_dir().unwrap();
+
+        for path in paths {
+            let buf = fs::read_to_string(path.unwrap().path()).unwrap();
+            let txt = buf.parse::<SecurityTxt>();
+            assert_eq!(txt.is_ok(), true);
+        }
+    }
 }

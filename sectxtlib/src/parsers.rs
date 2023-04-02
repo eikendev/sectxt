@@ -194,9 +194,10 @@ mod tests {
     fn test_line_parser() {
         let test_vector = vec![
             ("\n", None),
+            ("\t \r\n", None),
             ("# This is a comment.\n", None),
             (
-                "foo: bar\n",
+                "foo: bar\r\n",
                 Some(RawField {
                     name: "foo",
                     value: "bar",

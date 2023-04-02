@@ -9,7 +9,7 @@ macro_rules! IriStringImpl {
     ($structname:ident) => {
         impl $structname {
             pub(crate) fn new(uri: &str) -> Result<Self, ParseError> {
-                let uri = uri.parse::<IriString>()?;
+                let uri = uri.trim().parse::<IriString>()?;
 
                 if uri.scheme_str() == "http" {
                     return Err(ParseError::InsecureHTTP);
@@ -82,7 +82,7 @@ pub struct ExpiresField {
 
 impl ExpiresField {
     pub(crate) fn new(datetime: &str, now: DateTime<Utc>) -> Result<Self, ParseError> {
-        let datetime: DateTime<Utc> = datetime.parse()?;
+        let datetime: DateTime<Utc> = datetime.trim().parse()?;
 
         if datetime < now {
             return Err(ParseError::ExpiresFieldExpired);
@@ -141,7 +141,8 @@ pub struct PreferredLanguagesField {
 impl PreferredLanguagesField {
     pub(crate) fn new(languages: &str) -> Result<Self, ParseError> {
         let languages = languages
-            .split(", ")
+            .split(',')
+            .map(str::trim)
             .map(LanguageTag::parse_and_normalize)
             .collect::<Result<Vec<LanguageTag<String>>, LanguageTagParseError>>()?;
 
