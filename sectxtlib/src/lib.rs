@@ -1,10 +1,10 @@
 mod fields;
 mod parse_error;
 mod parsers;
+mod pgpcleartextmessage;
 mod raw_field;
 mod securitytxt;
 mod securitytxt_options;
-mod signature;
 
 pub use fields::{
     AcknowledgmentsField, CanonicalField, ContactField, EncryptionField, ExpiresField, ExtensionField, HiringField,

@@ -1,19 +1,19 @@
 use super::raw_field::RawField;
-use super::signature::PGPSignature;
 
 use nom::{
     branch::alt,
-    bytes::complete::{tag, take_while, take_while1},
-    character::complete::{char, crlf, none_of, one_of, satisfy},
+    bytes::complete::{take_while, take_while1},
+    character::complete::{char, crlf, satisfy},
     combinator::{all_consuming, map, opt, recognize},
-    multi::{many0, many0_count, many1, many1_count, separated_list1},
-    sequence::{delimited, preceded, separated_pair, terminated, tuple},
+    multi::{many0_count, many1},
+    sequence::{preceded, terminated, tuple},
     IResult,
 };
 
 // body             =  signed / unsigned
+// signed is handled separately.
 pub(crate) fn body_parser(i: &str) -> IResult<&str, Vec<Option<RawField>>> {
-    all_consuming(alt((unsigned_parser, signed_parser)))(i)
+    all_consuming(unsigned_parser)(i)
 }
 
 // unsigned       =  *line (contact-field eol) ; one or more required
@@ -163,135 +163,6 @@ fn is_wsp(i: char) -> bool {
     i == ' ' || i == '\t'
 }
 
-// signed           =  cleartext-header
-//                     1*(hash-header)
-//                     CRLF
-//                     cleartext
-//                     signature
-fn signed_parser(i: &str) -> IResult<&str, Vec<Option<RawField>>> {
-    let (_, (_, _, _, cleartext, _)) = all_consuming(tuple((
-        cleartext_header_parser,
-        many1_count(hash_header_parser),
-        crlf_parser,
-        cleartext_parser,
-        signature_parser,
-    )))(i)?;
-
-    all_consuming(unsigned_parser)(cleartext)
-}
-
-// cleartext-header =  %s"-----BEGIN PGP SIGNED MESSAGE-----" CRLF
-fn cleartext_header_parser(i: &str) -> IResult<&str, &str> {
-    terminated(tag("-----BEGIN PGP SIGNED MESSAGE-----"), crlf_parser)(i)
-}
-
-// hash-header      =  %s"Hash: " hash-alg *("," hash-alg) CRLF
-fn hash_header_parser(i: &str) -> IResult<&str, Vec<&str>> {
-    delimited(tag("Hash: "), separated_list1(tag(","), hash_alg_parser), crlf_parser)(i)
-}
-
-// hash-alg         =  token
-//                       ; imported from RFC 2045; see RFC 4880 Section
-//                       ; 10.3.3 for a pointer to the registry of
-//                       ; valid values
-fn hash_alg_parser(i: &str) -> IResult<&str, &str> {
-    token_parser(i)
-}
-
-// < Section 5.1 of [RFC2045] >
-// token := 1*<any (US-ASCII) CHAR except SPACE, CTLs,
-//             or tspecials>
-fn token_parser(i: &str) -> IResult<&str, &str> {
-    take_while1(is_token_char)(i)
-}
-
-// < Section 5.1 of [RFC2045] >
-// tspecials :=  "(" / ")" / "<" / ">" / "@" /
-//               "," / ";" / ":" / "\" / <">
-//               "/" / "[" / "]" / "?" / "="
-//               ; Must be in quoted-string,
-//               ; to use within parameter values
-fn is_token_char(i: char) -> bool {
-    let tspecials = "()<>@,;:\\\"/[]?=";
-    i != ' ' && !i.is_ascii_control() && tspecials.find(i).is_none()
-}
-
-// cleartext        =  *((line-dash / line-from / line-nodash) [CR] LF)
-fn cleartext_parser(i: &str) -> IResult<&str, &str> {
-    recognize(many0_count(tuple((
-        alt((line_dash_parser, line_nodash_parser)),
-        opt(cr_parser),
-        lf_parser,
-    ))))(i)
-}
-
-// line-dash        =  ("- ") "-" *UTF8-char-not-cr
-//                        ; MUST include initial "- "
-fn line_dash_parser(i: &str) -> IResult<&str, &str> {
-    preceded(
-        tag("- "),
-        recognize(tuple((one_of("-"), take_while(|x| x != '\r' && x != '\n')))),
-    )(i)
-}
-
-// line-nodash      =  ["- "] *UTF8-char-not-cr
-//                       ; MAY include initial "- "
-fn line_nodash_parser(i: &str) -> IResult<&str, &str> {
-    preceded(
-        opt(tag("- ")),
-        recognize(opt(tuple((none_of("-"), take_while(|x| x != '\r' && x != '\n'))))),
-    )(i)
-}
-
-// signature        =  armor-header
-//                     armor-keys
-//                     CRLF
-//                     signature-data
-//                     armor-tail
-fn signature_parser(i: &str) -> IResult<&str, PGPSignature> {
-    let (i, (_, keys, _, signature, _)) = tuple((
-        armor_header_parser,
-        armor_keys_parser,
-        crlf_parser,
-        signature_data_parser,
-        armor_tail_parser,
-    ))(i)?;
-
-    Ok((i, PGPSignature { signature, keys }))
-}
-
-// armor-header     =  %s"-----BEGIN PGP SIGNATURE-----" CRLF
-fn armor_header_parser(i: &str) -> IResult<&str, &str> {
-    terminated(tag("-----BEGIN PGP SIGNATURE-----"), crlf_parser)(i)
-}
-
-// armor-keys       =  *(token ": " *( VCHAR / WSP ) CRLF)
-//                       ; Armor Header Keys from RFC 4880
-fn armor_keys_parser(i: &str) -> IResult<&str, Vec<(&str, &str)>> {
-    many0(terminated(
-        separated_pair(token_parser, tag(": "), take_while(|x| is_vchar(x) || is_wsp(x))),
-        crlf_parser,
-    ))(i)
-}
-
-// armor-tail       =  %s"-----END PGP SIGNATURE-----" CRLF
-fn armor_tail_parser(i: &str) -> IResult<&str, &str> {
-    terminated(tag("-----END PGP SIGNATURE-----"), crlf_parser)(i)
-}
-
-// signature-data   =  1*(1*(ALPHA / DIGIT / "=" / "+" / "/") CRLF)
-//                       ; base64; see RFC 4648
-//                       ; includes RFC 4880 checksum
-fn signature_data_parser(i: &str) -> IResult<&str, &str> {
-    recognize(many1_count(terminated(
-        take_while1(is_signature_data_char),
-        crlf_parser,
-    )))(i)
-}
-fn is_signature_data_char(i: char) -> bool {
-    matches!(i, 'a'..='z' | 'A'..='Z' | '0'..='9' | '=' | '+' | '/')
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -337,15 +208,6 @@ mod tests {
 
         for (input, result) in test_vector {
             assert_eq!(line_parser(input), Ok(("", result)));
-        }
-    }
-
-    #[test]
-    fn test_cleartext_parser() {
-        let test_vector = vec![("- -\r\n", "-")];
-
-        for (input, result) in test_vector {
-            assert_eq!(cleartext_parser(input), Ok(("", result)));
         }
     }
 }
