@@ -1,6 +1,6 @@
 [package]
 name = "sectxt"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["eikendev"]
 edition = "2021"
 description = "A tool for working with security.txt files as specified in RFC 9116"
@@ -10,7 +10,7 @@ readme = "README.md"
 license = "ISC"
 
 [dependencies]
-sectxtlib = { path = "../sectxtlib", version = "0.2.1" }
+sectxtlib = { path = "../sectxtlib", version = "0.2.2" }
 anyhow = ">=1.0"
 argh = ">=0.1"
 futures = ">=0.3"

@@ -1162,7 +1162,7 @@ checksum = "1792db035ce95be60c3f8853017b3999209281c24e2ba5bc8e59bf97a0c590c1"
 
 [[package]]
 name = "sectxt"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "anyhow",
  "argh",
@@ -1180,7 +1180,7 @@ dependencies = [
 
 [[package]]
 name = "sectxtfuzz"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "afl",
  "sectxtlib",
@@ -1188,7 +1188,7 @@ dependencies = [
 
 [[package]]
 name = "sectxtlib"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "chrono",
  "iri-string",
