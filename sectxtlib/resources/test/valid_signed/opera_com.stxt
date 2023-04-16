@@ -1,0 +1,56 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+# Please always try to contact Opera Security Team through our responsible disclosure form which is available
+# under Report an Issue to speed up things. Keep in mind that there are also separate dedicated forms for
+# reporting a fraud page or submitting privacy inquiry.
+Contact: https://security.opera.com
+# Reporting an issue regarding Opera assets covered by Opera Public Bug Bounty should be done at:
+Contact: https://bugcrowd.com/opera
+# Should that not be an option please reach to us via following email address:
+Contact: mailto:security@opera.com
+ 
+# You shouldn't trust this file, once it has expired.
+# We are sometimes a bit forgetful, but we do have an annual re-occuring task to keep this file up-to-date.
+Expires: 2024-04-01T00:00:00.000Z
+ 
+# Opera Security Team PGP key:
+#   pub   rsa4096/0x4A1BB804224DE5A4 2017-11-09 [SC] [expires: 2027-11-08]
+#        Key fingerprint = 62CD 131B B064 9427 08AC  FE62 4A1B B804 224D E5A4
+#   uid                              Opera Security Team <security@opera.com>
+# Available at:
+Encryption: https://security.opera.com/gpg-key/
+# Or via PGP keyservers: hkps://keyserver.ubuntu.com and hkps://pgp.mit.edu
+# Example: gpg --keyserver hkps://pgp.mit.edu --recv-keys 62cd131bb064942708acfe624a1bb804224de5a4
+Encryption: openpgp4fpr:62cd131bb064942708acfe624a1bb804224de5a4
+ 
+# Hall of Fame honouring resarchers that helped Opera improve security can be found at:
+Acknowledgments: https://security.opera.com/hall-of-fame/
+# Up to date Opera Public Bug Bounty hall of fame can be found at:
+Acknowledgments: https://bugcrowd.com/opera/hall-of-fame
+ 
+# We can offer you a proper response in the following languages:
+Preferred-Languages: en, pl
+ 
+# If you would like to report a security issue please first read our responsible disclosure policy:
+Policy: https://security.opera.com/policy/
+ 
+# Opera is hiring and looking for people like you! Current opening can be found at:
+Hiring: https://jobs.opera.com
+Hiring: https://linkedin.com/company/opera-software/jobs
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCAAdFiEEYs0TG7BklCcIrP5iShu4BCJN5aQFAmQiw0QACgkQShu4BCJN
+5aTXEg//RVPbpuXYp7tYLAhhlwqucq1+30DwLODRpXgxKrRUONbTbt4P6Mznsnrz
+W1GB0lM3oMaN85gq0PG1hwRIx6k5GoF1XpROg1D3F+B8H53XVPdqHX3HT/82C73o
+Q7zDahlmD183CifPIGtA1RIba/Z1SGel6o4m3JZjBRCeDDHJgV5E4mM5AtFtMWvC
+jCIPaZ9rmlWT/TY95y6Sq3J9KsnWzoRPbm724Sz6HeMa2z7KzU/9CWkixm1DIK8A
+yQyqGxB8JkLqQRumkoarQ/H2qoB03Pr4zIo8wLaErMxsU6kNqenH1WPZCsYjLKqD
+dwubk+fnPRPMAUEEpvFgpHgY8sBDQsXeffZBBw+7qMXj/tnznLezoPqFwLb3dgB8
+/Vk/pfEH1TKZhUIvu83wb8p4o3UG51ErRvhCTvL+Mn2FDb6bYKqMuO1uIXEcwkjn
+ZgbzAl7r3iIRByYcL2sC1cNJGUuzH6Y48u4EL0tl85KN0XChaq5hAZ5+GQBdrEE3
+kgHY90Vi5qcLVx9lw/5t6UElnzz9AagALAP66mgKOAb00ZfOuXSRS5lKcTCnghN0
+YpxoFO1LG9O2QaE2XhHo26VBARlXbVf1dEB2oSBzYHB7Fti9qpUn82zeidXYqhPJ
+hFT/zl5/X4kM7sQsJUncGXjO4w3CzsUwEgv7bnvWja4x6KANDso=
+=BfcH
+-----END PGP SIGNATURE-----

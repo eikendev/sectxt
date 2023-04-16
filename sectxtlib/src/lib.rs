@@ -208,9 +208,8 @@ abcdefABCDEF/+==\r
         assert_eq!(file.parse(), Ok(sec));
     }
 
-    #[test]
-    fn test_category_valid_unsigned() {
-        let paths = get_tests_dir("valid_unsigned").read_dir().unwrap();
+    fn _test_category(category: &str) {
+        let paths = get_tests_dir(category).read_dir().unwrap();
 
         for path in paths {
             let buf = fs::read_to_string(path.unwrap().path()).unwrap();
@@ -221,14 +220,17 @@ abcdefABCDEF/+==\r
     }
 
     #[test]
-    fn test_category_gen_unsigned() {
-        let paths = get_tests_dir("gen_unsigned").read_dir().unwrap();
+    fn test_category_valid_unsigned() {
+        _test_category("valid_unsigned")
+    }
 
-        for path in paths {
-            let buf = fs::read_to_string(path.unwrap().path()).unwrap();
-            let parse_options = get_parse_options();
-            let txt = SecurityTxt::parse_with(&buf, &parse_options);
-            assert_eq!(txt.is_ok(), true);
-        }
+    #[test]
+    fn test_category_valid_signed() {
+        _test_category("valid_signed")
+    }
+
+    #[test]
+    fn test_category_gen_unsigned() {
+        _test_category("gen_unsigned")
     }
 }
