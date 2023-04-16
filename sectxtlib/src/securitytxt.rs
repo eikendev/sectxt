@@ -1,3 +1,5 @@
+use crate::pgpcleartextmessage::PGPCleartextMessage;
+
 use super::fields::{
     AcknowledgmentsField, CanonicalField, ContactField, EncryptionField, ExpiresField, ExtensionField, HiringField,
     PolicyField, PreferredLanguagesField,
@@ -121,9 +123,18 @@ impl SecurityTxt {
 
     /// Parses a security.txt file as a string according to [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116).
     pub fn parse_with(text: &str, options: &SecurityTxtOptions) -> Result<Self, ParseError> {
-        let (_, fields) = body_parser(text)?;
-        let fields: Vec<RawField> = fields.into_iter().flatten().collect();
-        Self::new(fields, options)
+        match body_parser(text) {
+            Ok((_, fields)) => {
+                let fields: Vec<RawField> = fields.into_iter().flatten().collect();
+                Self::new(fields, options)
+            }
+            _ => {
+                let msg = PGPCleartextMessage::parse(text)?;
+                let (_, fields) = body_parser(&msg.cleartext)?;
+                let fields: Vec<RawField> = fields.into_iter().flatten().collect();
+                Self::new(fields, options)
+            }
+        }
     }
 }
 

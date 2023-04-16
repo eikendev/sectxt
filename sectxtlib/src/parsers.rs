@@ -11,6 +11,7 @@ use nom::{
 };
 
 // body             =  signed / unsigned
+// signed is handled separately.
 pub(crate) fn body_parser(i: &str) -> IResult<&str, Vec<Option<RawField>>> {
     all_consuming(unsigned_parser)(i)
 }
