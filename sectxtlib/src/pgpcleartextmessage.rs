@@ -185,29 +185,34 @@ fn is_wsp(i: char) -> bool {
 mod tests {
     use super::*;
 
+    const SIGNATURE_DATA: &str = "iHUEARYKAB0WIQSsP2kEdoKDVFpSg6u3rK+YCkjapwUCY9qRaQAKCRC3rK+YCkja\r
+pwALAP9LEHSYMDW4h8QRHg4MwCzUdnbjBLIvpq4QTo3dIqCUPwEA31MsEf95OKCh\r
+MTHYHajOzjwpwlQVrjkK419igx4imgk=\r
+=KONn\r
+";
+
     #[test]
     fn test_parse() {
-        let txt = r"-----BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA512
-
-Test
------BEGIN PGP SIGNATURE-----
-
-iHUEARYKAB0WIQSsP2kEdoKDVFpSg6u3rK+YCkjapwUCY9qRaQAKCRC3rK+YCkja
-pwALAP9LEHSYMDW4h8QRHg4MwCzUdnbjBLIvpq4QTo3dIqCUPwEA31MsEf95OKCh
-MTHYHajOzjwpwlQVrjkK419igx4imgk=
-=KONn
------END PGP SIGNATURE-----";
-
+        let txt = format!(
+            "-----BEGIN PGP SIGNED MESSAGE-----\r
+Hash: SHA512\r
+\r
+Test\r
+- Test\r
+-----BEGIN PGP SIGNATURE-----\r
+\r
+{SIGNATURE_DATA}-----END PGP SIGNATURE-----\r
+"
+        );
         let msg = PGPCleartextMessage {
-            hash_armor_headers: vec![],
-            cleartext: "".into(),
+            hash_armor_headers: vec![vec!["SHA512"]],
+            cleartext: "Test\r\nTest\r\n".into(),
             signature: PGPSignature {
-                signature: "",
+                signature: SIGNATURE_DATA,
                 keys: vec![],
             },
         };
-        assert_eq!(PGPCleartextMessage::parse(txt), Ok(msg));
+        assert_eq!(PGPCleartextMessage::parse(&txt), Ok(msg));
     }
 
     #[test]
@@ -251,19 +256,30 @@ MTHYHajOzjwpwlQVrjkK419igx4imgk=
 
     #[test]
     fn test_signature_parser() {
-        let input = r"-----BEGIN PGP SIGNATURE-----
-
-iHUEARYKAB0WIQSsP2kEdoKDVFpSg6u3rK+YCkjapwUCY9qRaQAKCRC3rK+YCkja
-pwALAP9LEHSYMDW4h8QRHg4MwCzUdnbjBLIvpq4QTo3dIqCUPwEA31MsEf95OKCh
-MTHYHajOzjwpwlQVrjkK419igx4imgk=
-=KONn
------END PGP SIGNATURE-----";
-
+        let input = format!(
+            "-----BEGIN PGP SIGNATURE-----\r
+\r
+{SIGNATURE_DATA}-----END PGP SIGNATURE-----\r
+"
+        );
         let signature = PGPSignature {
-            signature: "",
+            signature: SIGNATURE_DATA,
             keys: vec![],
         };
-        assert_eq!(signature_parser(input), Ok(("", signature)));
+
+        assert_eq!(signature_parser(&input), Ok(("", signature)));
+    }
+
+    #[test]
+    fn test_armor_header_parser() {
+        let input = "-----BEGIN PGP SIGNATURE-----\r\n";
+        assert_eq!(armor_header_parser(input), Ok(("", "-----BEGIN PGP SIGNATURE-----")));
+    }
+
+    #[test]
+    fn test_armor_tail_parser() {
+        let input = "-----END PGP SIGNATURE-----\r\n";
+        assert_eq!(armor_tail_parser(input), Ok(("", "-----END PGP SIGNATURE-----")));
     }
 
     #[test]

@@ -32,6 +32,10 @@ mod tests {
         ExpiresField::new(EXPIRES, now_dt()).unwrap()
     }
 
+    fn get_parse_options() -> SecurityTxtOptions {
+        SecurityTxtOptions { now: now_dt() }
+    }
+
     fn get_tests_dir(category: &str) -> PathBuf {
         let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         d.push(format!("resources/test/{category}"));
@@ -173,33 +177,36 @@ mod tests {
         assert_eq!(file.parse::<SecurityTxt>(), Err(ParseError::InsecureHTTP));
     }
 
-    //    #[test]
-    //    fn test_signed_contact() {
-    //        let file = format!(
-    //            "\
-    //            -----BEGIN PGP SIGNED MESSAGE-----\n\
-    //            Hash: SHA256\n\n\
-    //            Contact: {URL}\n\
-    //            Expires: {EXPIRES}\n\
-    //            -----BEGIN PGP SIGNATURE-----\n\
-    //            Version: GnuPG v2.2\n\n\
-    //            abcdefABCDEF/+==\n\
-    //            -----END PGP SIGNATURE-----\n"
-    //        );
-    //        let sec = SecurityTxt {
-    //            acknowledgments: vec![],
-    //            canonical: vec![],
-    //            contact: vec![ContactField::new(URL).unwrap()],
-    //            encryption: vec![],
-    //            expires: expires_dt(),
-    //            extension: vec![],
-    //            hiring: vec![],
-    //            policy: vec![],
-    //            preferred_languages: None,
-    //        };
-    //
-    //        assert_eq!(file.parse(), Ok(sec));
-    //    }
+    #[test]
+    fn test_signed_contact() {
+        let file = format!(
+            "-----BEGIN PGP SIGNED MESSAGE-----\r
+Hash: SHA256\r
+\r
+Contact: {URL}
+Contact: {URL}\r
+Expires: {EXPIRES}\r
+-----BEGIN PGP SIGNATURE-----\r
+Version: GnuPG v2.2\r
+\r
+abcdefABCDEF/+==\r
+-----END PGP SIGNATURE-----\r
+"
+        );
+        let sec = SecurityTxt {
+            acknowledgments: vec![],
+            canonical: vec![],
+            contact: vec![ContactField::new(URL).unwrap(), ContactField::new(URL).unwrap()],
+            encryption: vec![],
+            expires: expires_dt(),
+            extension: vec![],
+            hiring: vec![],
+            policy: vec![],
+            preferred_languages: None,
+        };
+
+        assert_eq!(file.parse(), Ok(sec));
+    }
 
     #[test]
     fn test_category_valid_unsigned() {
@@ -207,7 +214,8 @@ mod tests {
 
         for path in paths {
             let buf = fs::read_to_string(path.unwrap().path()).unwrap();
-            let txt = buf.parse::<SecurityTxt>();
+            let parse_options = get_parse_options();
+            let txt = SecurityTxt::parse_with(&buf, &parse_options);
             assert_eq!(txt.is_ok(), true);
         }
     }
@@ -218,7 +226,8 @@ mod tests {
 
         for path in paths {
             let buf = fs::read_to_string(path.unwrap().path()).unwrap();
-            let txt = buf.parse::<SecurityTxt>();
+            let parse_options = get_parse_options();
+            let txt = SecurityTxt::parse_with(&buf, &parse_options);
             assert_eq!(txt.is_ok(), true);
         }
     }
