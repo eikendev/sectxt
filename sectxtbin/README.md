@@ -16,8 +16,10 @@
 ## 🚀&nbsp;Installation
 
 ```bash
-cargo install sectxt
+RUSTFLAGS="--cfg tracing_unstable" cargo install sectxt
 ```
+
+Please refer to [issue #15](https://github.com/eikendev/sectxt/issues/15) for details.
 
 ## 📄&nbsp;Usage
 
