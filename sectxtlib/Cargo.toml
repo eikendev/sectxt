@@ -1,6 +1,6 @@
 [package]
 name = "sectxtlib"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["eikendev"]
 edition = "2021"
 description = "A library for parsing and validating security.txt files as specified in RFC 9116"

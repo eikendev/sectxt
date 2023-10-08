@@ -1,6 +1,6 @@
 [package]
 name = "sectxtfuzz"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["eikendev"]
 edition = "2021"
 description = "A fuzzer for sectxtlib"
