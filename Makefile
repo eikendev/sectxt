@@ -27,7 +27,7 @@ setup:
 	rustup component add clippy
 	rustup component add rustfmt
 	rustup show
-	cargo install afl
+	cargo install cargo-afl
 
 .PHONY: publish
 publish:
