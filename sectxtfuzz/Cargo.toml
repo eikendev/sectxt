@@ -1,6 +1,6 @@
 [package]
 name = "sectxtfuzz"
-version = "0.2.4"
+version = "0.2.5"
 authors = ["eikendev"]
 edition = "2021"
 description = "A fuzzer for sectxtlib"
@@ -11,4 +11,4 @@ license = "ISC"
 
 [dependencies]
 afl = "*"
-sectxtlib = { path = "../sectxtlib", version = "0.2.4" }
+sectxtlib = { path = "../sectxtlib", version = "0.2.5" }
