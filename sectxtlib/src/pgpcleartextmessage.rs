@@ -3,7 +3,7 @@ use super::parse_error::ParseError;
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_while, take_while1},
-    character::complete::{crlf, line_ending, none_of, one_of},
+    character::complete::{line_ending, none_of, one_of},
     combinator::{all_consuming, opt, peek, recognize},
     multi::{many0, many1, many1_count, separated_list1},
     sequence::{delimited, preceded, separated_pair, terminated, tuple},
@@ -39,7 +39,7 @@ fn signed_parser(i: &str) -> IResult<&str, PGPCleartextMessage> {
     let (_, (_, hash_armor_headers, _, cleartext, signature)) = all_consuming(tuple((
         cleartext_header_parser,
         many1(hash_header_parser),
-        crlf,
+        line_ending,
         cleartext_parser,
         signature_parser,
     )))(i)?;
@@ -56,12 +56,12 @@ fn signed_parser(i: &str) -> IResult<&str, PGPCleartextMessage> {
 
 // cleartext-header =  %s"-----BEGIN PGP SIGNED MESSAGE-----" CRLF
 fn cleartext_header_parser(i: &str) -> IResult<&str, &str> {
-    terminated(tag("-----BEGIN PGP SIGNED MESSAGE-----"), crlf)(i)
+    terminated(tag("-----BEGIN PGP SIGNED MESSAGE-----"), line_ending)(i)
 }
 
 // hash-header      =  %s"Hash: " hash-alg *("," hash-alg) CRLF
 fn hash_header_parser(i: &str) -> IResult<&str, Vec<&str>> {
-    delimited(tag("Hash: "), separated_list1(tag(","), hash_alg_parser), crlf)(i)
+    delimited(tag("Hash: "), separated_list1(tag(","), hash_alg_parser), line_ending)(i)
 }
 
 // hash-alg         =  token
@@ -132,7 +132,7 @@ fn signature_parser(i: &str) -> IResult<&str, PGPSignature> {
     let (i, (_, keys, _, signature, _)) = tuple((
         armor_header_parser,
         armor_keys_parser,
-        crlf,
+        line_ending,
         signature_data_parser,
         armor_tail_parser,
     ))(i)?;
@@ -142,7 +142,7 @@ fn signature_parser(i: &str) -> IResult<&str, PGPSignature> {
 
 // armor-header     =  %s"-----BEGIN PGP SIGNATURE-----" CRLF
 fn armor_header_parser(i: &str) -> IResult<&str, &str> {
-    terminated(tag("-----BEGIN PGP SIGNATURE-----"), crlf)(i)
+    terminated(tag("-----BEGIN PGP SIGNATURE-----"), line_ending)(i)
 }
 
 // armor-keys       =  *(token ": " *( VCHAR / WSP ) CRLF)
@@ -150,20 +150,23 @@ fn armor_header_parser(i: &str) -> IResult<&str, &str> {
 fn armor_keys_parser(i: &str) -> IResult<&str, Vec<(&str, &str)>> {
     many0(terminated(
         separated_pair(token_parser, tag(": "), take_while(|x| is_vchar(x) || is_wsp(x))),
-        crlf,
+        line_ending,
     ))(i)
 }
 
 // armor-tail       =  %s"-----END PGP SIGNATURE-----" CRLF
 fn armor_tail_parser(i: &str) -> IResult<&str, &str> {
-    terminated(tag("-----END PGP SIGNATURE-----"), crlf)(i)
+    terminated(tag("-----END PGP SIGNATURE-----"), line_ending)(i)
 }
 
 // signature-data   =  1*(1*(ALPHA / DIGIT / "=" / "+" / "/") CRLF)
 //                       ; base64; see RFC 4648
 //                       ; includes RFC 4880 checksum
 fn signature_data_parser(i: &str) -> IResult<&str, &str> {
-    recognize(many1_count(terminated(take_while1(is_signature_data_char), crlf)))(i)
+    recognize(many1_count(terminated(
+        take_while1(is_signature_data_char),
+        line_ending,
+    )))(i)
 }
 fn is_signature_data_char(i: char) -> bool {
     matches!(i, 'a'..='z' | 'A'..='Z' | '0'..='9' | '=' | '+' | '/')
