@@ -21,7 +21,7 @@ fn stdin(threads: usize) -> impl Stream<Item = String> {
     let (mut tx, rx) = channel(threads);
 
     std::thread::spawn(move || {
-        for line in std::io::stdin().lock().lines().flatten() {
+        for line in std::io::stdin().lock().lines().map_while(Result::ok) {
             loop {
                 let status = tx.try_send(line.to_owned());
 
