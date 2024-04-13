@@ -33,7 +33,10 @@ mod tests {
     }
 
     fn get_parse_options() -> SecurityTxtOptions {
-        SecurityTxtOptions { now: now_dt() }
+        SecurityTxtOptions {
+            now: now_dt(),
+            strict: true,
+        }
     }
 
     fn get_tests_dir(category: &str) -> PathBuf {

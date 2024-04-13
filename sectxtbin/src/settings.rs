@@ -11,6 +11,10 @@ pub struct Settings {
     #[argh(option, default = "3")]
     pub timeout: u64,
 
+    /// whether to be strict with line endings or more relaxed
+    #[argh(switch)]
+    pub strict: bool,
+
     /// only print domains for which the run was successful
     #[argh(switch, short = 'q')]
     pub quiet: bool,

@@ -1,11 +1,11 @@
-use crate::pgpcleartextmessage::PGPCleartextMessage;
+use crate::parsers::SecurityTxtParser;
+use crate::pgpcleartextmessage::PGPCleartextMessageParser;
 
 use super::fields::{
     AcknowledgmentsField, CanonicalField, ContactField, EncryptionField, ExpiresField, ExtensionField, HiringField,
     PolicyField, PreferredLanguagesField,
 };
 use super::parse_error::ParseError;
-use super::parsers::body_parser;
 use super::raw_field::RawField;
 use super::securitytxt_options::SecurityTxtOptions;
 use std::cmp::Ordering;
@@ -44,7 +44,7 @@ pub struct SecurityTxt {
 }
 
 impl SecurityTxt {
-    fn validate_contact_fields(fields: &Vec<ContactField>) -> Result<(), ParseError> {
+    fn validate_contact_fields(fields: &[ContactField]) -> Result<(), ParseError> {
         if fields.is_empty() {
             return Err(ParseError::ContactFieldMissing);
         }
@@ -52,7 +52,7 @@ impl SecurityTxt {
         Ok(())
     }
 
-    fn validate_expires(fields: &Vec<ExpiresField>) -> Result<(), ParseError> {
+    fn validate_expires(fields: &[ExpiresField]) -> Result<(), ParseError> {
         if fields.is_empty() {
             return Err(ParseError::ExpiresFieldMissing);
         }
@@ -63,7 +63,7 @@ impl SecurityTxt {
         Ok(())
     }
 
-    fn validate_preferred_languages(fields: &Vec<PreferredLanguagesField>) -> Result<(), ParseError> {
+    fn validate_preferred_languages(fields: &[PreferredLanguagesField]) -> Result<(), ParseError> {
         if fields.len() > 1 {
             return Err(ParseError::PreferredLanguagesFieldMultiple);
         }
@@ -123,14 +123,17 @@ impl SecurityTxt {
 
     /// Parses a security.txt file as a string according to [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116).
     pub fn parse_with(text: &str, options: &SecurityTxtOptions) -> Result<Self, ParseError> {
-        match body_parser(text) {
-            Ok((_, fields)) => {
+        let unsigned_parser = SecurityTxtParser::new(options);
+
+        match unsigned_parser.parse(text) {
+            Ok(fields) => {
                 let fields: Vec<RawField> = fields.into_iter().flatten().collect();
                 Self::new(fields, options)
             }
             _ => {
-                let msg = PGPCleartextMessage::parse(text)?;
-                let (_, fields) = body_parser(&msg.cleartext)?;
+                let signed_parser = PGPCleartextMessageParser::new(options);
+                let msg = signed_parser.parse(text)?;
+                let fields = unsigned_parser.parse(&msg.cleartext)?;
                 let fields: Vec<RawField> = fields.into_iter().flatten().collect();
                 Self::new(fields, options)
             }
