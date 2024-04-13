@@ -10,6 +10,15 @@ pub struct SecurityTxtOptions {
     pub strict: bool,
 }
 
+impl SecurityTxtOptions {
+    pub fn new(strict: bool) -> Self {
+        Self {
+            now: Utc::now(),
+            strict: strict,
+        }
+    }
+}
+
 impl Default for SecurityTxtOptions {
     fn default() -> Self {
         Self {
