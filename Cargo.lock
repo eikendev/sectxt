@@ -1052,7 +1052,7 @@ dependencies = [
 
 [[package]]
 name = "sectxt"
-version = "0.2.6"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "argh",
@@ -1070,7 +1070,7 @@ dependencies = [
 
 [[package]]
 name = "sectxtfuzz"
-version = "0.2.6"
+version = "0.3.0"
 dependencies = [
  "afl",
  "sectxtlib",
@@ -1078,7 +1078,7 @@ dependencies = [
 
 [[package]]
 name = "sectxtlib"
-version = "0.2.6"
+version = "0.3.0"
 dependencies = [
  "chrono",
  "iri-string",
