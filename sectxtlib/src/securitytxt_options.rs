@@ -14,7 +14,7 @@ impl SecurityTxtOptions {
     pub fn new(strict: bool) -> Self {
         Self {
             now: Utc::now(),
-            strict: strict,
+            strict,
         }
     }
 }
