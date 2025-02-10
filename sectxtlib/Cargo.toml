@@ -10,9 +10,9 @@ readme = "README.md"
 license = "ISC"
 
 [dependencies]
-chrono = ">=0.4.10"
-iri-string = ">=0.7.0"
-nom = ">=5.1.2"
-oxilangtag = ">=0.1.0"
-thiserror = ">=1.0"
-valuable = { version = ">=0.1.0", features = ["derive"] }
+chrono = "0.4.10"
+iri-string = "0.7.0"
+nom = ">=5.1.2, <8"
+oxilangtag = "0.1.0"
+thiserror = "2.0"
+valuable = { version = "0.1.0", features = ["derive"] }
