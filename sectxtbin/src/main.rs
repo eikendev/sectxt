@@ -12,7 +12,7 @@ use settings::Settings;
 use status::Status;
 use std::io::BufRead;
 use std::time::Duration;
-use tracing::info;
+use tracing::{debug, info};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{fmt, EnvFilter};
 use website::Website;
@@ -77,6 +77,7 @@ async fn process_domains(s: &'static Settings) -> (u64, u64) {
 
     let count: (u64, u64) = statuses
         .fold((0, 0), |acc, status: Status| async move {
+            debug!(domain = &status.domain, available = status.available);
             match s {
                 _ if status.available => (acc.0 + 1, acc.1 + 1),
                 _ => (acc.0 + 1, acc.1),
