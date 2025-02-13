@@ -23,14 +23,14 @@ impl SecurityTxtParser {
         }
     }
 
-    pub fn parse<'a>(&'a self, text: &'a str) -> Result<Vec<Option<RawField>>, ParseError> {
+    pub fn parse<'a>(&'a self, text: &'a str) -> Result<Vec<Option<RawField<'a>>>, ParseError> {
         let (_, msg) = self.body_parser(text)?;
         Ok(msg)
     }
 
     // body             =  signed / unsigned
     // signed is handled separately.
-    fn body_parser<'a>(&'a self, i: &'a str) -> IResult<&str, Vec<Option<RawField>>> {
+    fn body_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, Vec<Option<RawField<'a>>>> {
         all_consuming(|x| self.unsigned_parser(x))(i)
     }
 
@@ -41,12 +41,12 @@ impl SecurityTxtParser {
     //                   ; except that if contact-field appears more
     //                   ; than once, the order of those indicates
     //                   ; priority (see Section 3.5.3)
-    fn unsigned_parser<'a>(&'a self, i: &'a str) -> IResult<&str, Vec<Option<RawField>>> {
+    fn unsigned_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, Vec<Option<RawField<'a>>>> {
         many1(|x| self.line_parser(x))(i)
     }
 
     // line             =  [ (field / comment) ] eol
-    fn line_parser<'a>(&'a self, i: &'a str) -> IResult<&str, Option<RawField>> {
+    fn line_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, Option<RawField<'a>>> {
         let field_parser_opt = map(|x| self.field_parser(x), Some);
         let comment_parser_opt = map(|x| self.comment_parser(x), |_| None);
 
@@ -56,7 +56,7 @@ impl SecurityTxtParser {
     }
 
     // eol              =  *WSP [CR] LF
-    fn eol_parser<'a>(&'a self, i: &'a str) -> IResult<&str, &str> {
+    fn eol_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, &'a str> {
         recognize(tuple((take_while(is_wsp), opt(|x| self.cr_parser(x)), |x| {
             self.lf_parser(x)
         })))(i)
@@ -70,17 +70,17 @@ impl SecurityTxtParser {
     //                     hiring-field /
     //                     policy-field /
     //                     ext-field
-    fn field_parser<'a>(&'a self, i: &'a str) -> IResult<&str, RawField> {
+    fn field_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, RawField<'a>> {
         self.ext_name_parser(i)
     }
 
     // fs               =  ":"
-    fn fs_parser<'a>(&'a self, i: &'a str) -> IResult<&str, char> {
+    fn fs_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, char> {
         char(':')(i)
     }
 
     // comment          =  "#" *(WSP / VCHAR / %x80-FFFFF)
-    fn comment_parser<'a>(&'a self, i: &'a str) -> IResult<&str, &str> {
+    fn comment_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, &'a str> {
         let matcher = |x| is_wsp(x) || is_vchar(x) || x >= '\u{80}';
         preceded(char('#'), take_while(matcher))(i)
     }
@@ -99,7 +99,7 @@ impl SecurityTxtParser {
     // uri              =  < URI as per Section 3 of [RFC3986] >
 
     // ext-field        =  field-name fs SP unstructured
-    fn ext_name_parser<'a>(&'a self, i: &'a str) -> IResult<&str, RawField> {
+    fn ext_name_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, RawField<'a>> {
         let (i, (name, _, _, value)) = tuple((
             |x| self.field_name_parser(x),
             |x| self.fs_parser(x),
@@ -111,14 +111,14 @@ impl SecurityTxtParser {
 
     // field-name       =  < imported from Section 3.6.8 of [RFC5322] >
     // field-name       =  1*ftext
-    fn field_name_parser<'a>(&'a self, i: &'a str) -> IResult<&str, &str> {
+    fn field_name_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, &'a str> {
         take_while1(is_ftext_char)(i)
     }
 
     // < imported from [RFC5322] >
     // unstructured     =   *([FWS] VCHAR) *WSP
     // Ommitted obsolete part.
-    fn unstructured_parser<'a>(&'a self, i: &'a str) -> IResult<&str, &str> {
+    fn unstructured_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, &'a str> {
         recognize(terminated(
             recognize(many0_count(preceded(opt(|x| self.fws_parser(x)), satisfy(is_vchar)))),
             take_while(is_wsp),
@@ -128,29 +128,29 @@ impl SecurityTxtParser {
     // < imported from [RFC5322] >
     // FWS              =   [*WSP CRLF] 1*WSP
     // Ommitted obsolete part.
-    fn fws_parser<'a>(&'a self, i: &'a str) -> IResult<&str, &str> {
+    fn fws_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, &'a str> {
         recognize(preceded(
             opt(tuple((take_while(is_wsp), |x| self.crlf_parser(x)))),
             take_while1(is_wsp),
         ))(i)
     }
 
-    fn cr_parser<'a>(&'a self, i: &'a str) -> IResult<&str, char> {
+    fn cr_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, char> {
         satisfy(is_cr)(i)
     }
 
     // CRLF             =  CR LF
     //                       ; Internet standard newline
-    fn crlf_parser<'a>(&'a self, i: &'a str) -> IResult<&str, &str> {
+    fn crlf_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, &'a str> {
         crlf(i)
     }
 
-    fn lf_parser<'a>(&'a self, i: &'a str) -> IResult<&str, char> {
+    fn lf_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, char> {
         satisfy(is_lf)(i)
     }
 
     // SP               =  %x20
-    fn sp_parser<'a>(&'a self, i: &'a str) -> IResult<&str, char> {
+    fn sp_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, char> {
         char(' ')(i)
     }
 }
@@ -211,7 +211,7 @@ mod tests {
             println!("Input file: {:?}", file);
             let buf = fs::read_to_string(file).unwrap();
             let txt = unsigned_parser.parse(&buf);
-            assert_eq!(txt.is_ok(), true);
+            assert!(txt.is_ok());
         }
     }
 
