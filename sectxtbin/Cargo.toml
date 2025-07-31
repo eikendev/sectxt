@@ -1,6 +1,6 @@
 [package]
 name = "sectxt"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["eikendev"]
 edition = "2021"
 description = "A tool for working with security.txt files as specified in RFC 9116"
@@ -10,18 +10,18 @@ readme = "README.md"
 license = "ISC"
 
 [dependencies]
-sectxtlib = { path = "../sectxtlib", version = "0.3.1" }
-anyhow = ">=1.0"
-argh = ">=0.1"
-futures = ">=0.3"
-human-panic = ">=1.1"
-lazy_static = ">=1.4"
-reqwest = ">=0.11"
-tracing = ">=0.1.37"
-tracing-subscriber = { version = ">=0.3.16", features = ["env-filter", "json", "valuable"] }
-url = ">=2.3.0"
-valuable = ">=0.1.0"
+sectxtlib = { path = "../sectxtlib", version = "0.3.2" }
+anyhow = "1.0.98"
+argh = "0.1.13"
+futures = "0.3.31"
+human-panic = "2.0.3"
+lazy_static = "1.5.0"
+reqwest = "0.12.22"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter", "json", "valuable"] }
+url = "2.5.4"
+valuable = "0.1.1"
 
 [dependencies.tokio]
-version = "1"
+version = "1.47.0"
 features = ["rt-multi-thread", "macros"]
