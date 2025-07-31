@@ -17,7 +17,7 @@ pub use securitytxt_options::SecurityTxtOptions;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::{DateTime, Utc};
+    use chrono::{DateTime, TimeZone, Utc};
     use std::{fs, path::PathBuf};
 
     const URL: &str = "https://securitytxt.org/";
@@ -235,5 +235,42 @@ abcdefABCDEF/+==\r
     #[test]
     fn test_category_gen_unsigned() {
         _test_category("gen_unsigned")
+    }
+
+    #[test]
+    fn test_expires_non_z_time() {
+        let test_times = [
+            ("2025-08-30T00:00:00+00:00", Utc.with_ymd_and_hms(2025, 8, 30, 0, 0, 0)),
+            (
+                "2025-08-30T12:34:56+00:00",
+                Utc.with_ymd_and_hms(2025, 8, 30, 12, 34, 56),
+            ),
+            ("2025-08-30T02:00:00+02:00", Utc.with_ymd_and_hms(2025, 8, 30, 0, 0, 0)),
+            ("2025-08-30T02:00:00-02:00", Utc.with_ymd_and_hms(2025, 8, 30, 4, 0, 0)),
+        ];
+
+        for (expires_str, expected_dt) in &test_times {
+            let file = format!("Contact: {URL}\nExpires: {expires_str}\n");
+            let sec = SecurityTxt {
+                acknowledgments: vec![],
+                canonical: vec![],
+                contact: vec![ContactField::new(URL).unwrap()],
+                encryption: vec![],
+                expires: ExpiresField::new(expires_str, now_dt()).unwrap(),
+                extension: vec![],
+                hiring: vec![],
+                policy: vec![],
+                preferred_languages: None,
+            };
+
+            let parsed: SecurityTxt = file.parse().unwrap();
+            assert_eq!(parsed, sec);
+            let expected_dt = expected_dt.single().unwrap();
+            assert_eq!(parsed.expires.datetime.timestamp(), expected_dt.timestamp());
+            assert_eq!(
+                parsed.expires.datetime.timestamp_subsec_millis(),
+                expected_dt.timestamp_subsec_millis()
+            );
+        }
     }
 }
