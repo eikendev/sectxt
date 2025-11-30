@@ -19,24 +19,24 @@ mod tests {
     use crate::fields::CsafField;
 
     use super::*;
-    use chrono::{DateTime, TimeZone, Utc};
+    use chrono::{DateTime, Datelike, TimeZone, Utc};
     use std::{fs, path::PathBuf};
 
     const URL: &str = "https://securitytxt.org/";
     const INSECURE_URL: &str = "http://securitytxt.org/";
     const EXPIRES: &str = "2030-01-01T08:19:03.000Z";
 
-    fn now_dt() -> DateTime<Utc> {
+    fn some_datetime() -> DateTime<Utc> {
         DateTime::parse_from_rfc3339("2023-01-01T08:19:03.000Z").unwrap().into()
     }
 
     fn expires_dt() -> ExpiresField {
-        ExpiresField::new(EXPIRES, now_dt()).unwrap()
+        ExpiresField::new(EXPIRES, some_datetime()).unwrap()
     }
 
     fn get_parse_options() -> SecurityTxtOptions {
         SecurityTxtOptions {
-            now: now_dt(),
+            now: some_datetime(),
             strict: true,
         }
     }
@@ -266,14 +266,24 @@ abcdefABCDEF/+==\r
 
     #[test]
     fn test_expires_non_z_time() {
+        let next_year = Utc::now().year() + 1;
         let test_times = [
-            ("2025-08-30T00:00:00+00:00", Utc.with_ymd_and_hms(2025, 8, 30, 0, 0, 0)),
             (
-                "2025-08-30T12:34:56+00:00",
-                Utc.with_ymd_and_hms(2025, 8, 30, 12, 34, 56),
+                format!("{next_year}-08-30T00:00:00+00:00"),
+                Utc.with_ymd_and_hms(next_year, 8, 30, 0, 0, 0),
             ),
-            ("2025-08-30T02:00:00+02:00", Utc.with_ymd_and_hms(2025, 8, 30, 0, 0, 0)),
-            ("2025-08-30T02:00:00-02:00", Utc.with_ymd_and_hms(2025, 8, 30, 4, 0, 0)),
+            (
+                format!("{next_year}-08-30T12:34:56+00:00"),
+                Utc.with_ymd_and_hms(next_year, 8, 30, 12, 34, 56),
+            ),
+            (
+                format!("{next_year}-08-30T02:00:00+02:00"),
+                Utc.with_ymd_and_hms(next_year, 8, 30, 0, 0, 0),
+            ),
+            (
+                format!("{next_year}-08-30T02:00:00-02:00"),
+                Utc.with_ymd_and_hms(next_year, 8, 30, 4, 0, 0),
+            ),
         ];
 
         for (expires_str, expected_dt) in &test_times {
@@ -284,7 +294,7 @@ abcdefABCDEF/+==\r
                 contact: vec![ContactField::new(URL).unwrap()],
                 csaf: vec![],
                 encryption: vec![],
-                expires: ExpiresField::new(expires_str, now_dt()).unwrap(),
+                expires: ExpiresField::new(expires_str, some_datetime()).unwrap(),
                 extension: vec![],
                 hiring: vec![],
                 policy: vec![],
