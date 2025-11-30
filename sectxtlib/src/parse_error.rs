@@ -14,9 +14,9 @@ pub enum ParseError {
     ContactFieldMissing,
     #[error("expires field must be specified")]
     ExpiresFieldMissing,
-    #[error("expires field may only be specified once")]
-    ExpiresFieldExpired,
     #[error("expires field specifies time in the past")]
+    ExpiresFieldExpired,
+    #[error("expires field may only be specified once")]
     ExpiresFieldMultiple,
     #[error("preferred languages field may only be specified once")]
     PreferredLanguagesFieldMultiple,
