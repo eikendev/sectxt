@@ -61,6 +61,16 @@ pub struct ContactField {
 }
 IriStringImpl!(ContactField);
 
+/// A [CSAF field](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt) contains the canonical URI for the CSAF provider-metadata.json
+#[derive(Debug, PartialEq)]
+pub struct CsafField {
+    /// The URI of the link according to the [CSAF Standard](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt)
+    pub uri: IriString,
+
+    log_value: String,
+}
+IriStringImpl!(CsafField);
+
 /// An [Encryption field](https://www.rfc-editor.org/rfc/rfc9116#name-encryption) links to a key to be used for encrypted communication
 #[derive(Debug, PartialEq)]
 pub struct EncryptionField {

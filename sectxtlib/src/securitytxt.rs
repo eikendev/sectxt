@@ -2,8 +2,8 @@ use crate::parsers::SecurityTxtParser;
 use crate::pgpcleartextmessage::PGPCleartextMessageParser;
 
 use super::fields::{
-    AcknowledgmentsField, CanonicalField, ContactField, EncryptionField, ExpiresField, ExtensionField, HiringField,
-    PolicyField, PreferredLanguagesField,
+    AcknowledgmentsField, CanonicalField, ContactField, CsafField, EncryptionField, ExpiresField, ExtensionField,
+    HiringField, PolicyField, PreferredLanguagesField,
 };
 use super::parse_error::ParseError;
 use super::raw_field::RawField;
@@ -23,6 +23,9 @@ pub struct SecurityTxt {
 
     /// A collection of "Contact" fields
     pub contact: Vec<ContactField>,
+
+    /// A collection of "CSAF" fields,
+    pub csaf: Vec<CsafField>,
 
     /// A collection of "Encryption" fields
     pub encryption: Vec<EncryptionField>,
@@ -75,6 +78,7 @@ impl SecurityTxt {
         let mut acknowledgments: Vec<AcknowledgmentsField> = vec![];
         let mut canonical: Vec<CanonicalField> = vec![];
         let mut contact: Vec<ContactField> = vec![];
+        let mut csaf: Vec<CsafField> = vec![];
         let mut encryption: Vec<EncryptionField> = vec![];
         let mut expires: Vec<ExpiresField> = vec![];
         let mut extension: Vec<ExtensionField> = vec![];
@@ -89,6 +93,7 @@ impl SecurityTxt {
                 "acknowledgments" => acknowledgments.push(AcknowledgmentsField::new(field.value)?),
                 "canonical" => canonical.push(CanonicalField::new(field.value)?),
                 "contact" => contact.push(ContactField::new(field.value)?),
+                "csaf" => csaf.push(CsafField::new(field.value)?),
                 "encryption" => encryption.push(EncryptionField::new(field.value)?),
                 "expires" => expires.push(ExpiresField::new(field.value, options.now)?),
                 "hiring" => hiring.push(HiringField::new(field.value)?),
@@ -106,6 +111,7 @@ impl SecurityTxt {
             acknowledgments,
             canonical,
             contact,
+            csaf,
             encryption,
             expires: expires.pop().unwrap(), // checked in Self::validate_expires()
             extension,
