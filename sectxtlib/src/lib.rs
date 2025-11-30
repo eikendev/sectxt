@@ -19,19 +19,22 @@ mod tests {
     use crate::fields::CsafField;
 
     use super::*;
-    use chrono::{DateTime, Datelike, TimeZone, Utc};
+    use chrono::{DateTime, Datelike, Duration, SecondsFormat, TimeZone, Utc};
     use std::{fs, path::PathBuf};
 
     const URL: &str = "https://securitytxt.org/";
     const INSECURE_URL: &str = "http://securitytxt.org/";
-    const EXPIRES: &str = "2030-01-01T08:19:03.000Z";
 
     fn some_datetime() -> DateTime<Utc> {
         DateTime::parse_from_rfc3339("2023-01-01T08:19:03.000Z").unwrap().into()
     }
 
-    fn expires_dt() -> ExpiresField {
-        ExpiresField::new(EXPIRES, some_datetime()).unwrap()
+    fn future_expires_str() -> String {
+        (Utc::now() + Duration::days(365)).to_rfc3339_opts(SecondsFormat::Millis, true)
+    }
+
+    fn expires_dt(expires: &str) -> ExpiresField {
+        ExpiresField::new(expires, some_datetime()).unwrap()
     }
 
     fn get_parse_options() -> SecurityTxtOptions {
@@ -49,14 +52,15 @@ mod tests {
 
     #[test]
     fn test_contact_and_expires() {
-        let file = format!("Contact: {URL}\nExpires: {EXPIRES}\n");
+        let expires = future_expires_str();
+        let file = format!("Contact: {URL}\nExpires: {expires}\n");
         let sec = SecurityTxt {
             acknowledgments: vec![],
             canonical: vec![],
             contact: vec![ContactField::new(URL).unwrap()],
             csaf: vec![],
             encryption: vec![],
-            expires: expires_dt(),
+            expires: expires_dt(&expires),
             extension: vec![],
             hiring: vec![],
             policy: vec![],
@@ -68,14 +72,15 @@ mod tests {
 
     #[test]
     fn test_comment() {
-        let file = format!("# this is a comment\n#\nContact: {URL}\nExpires: {EXPIRES}\n#\n");
+        let expires = future_expires_str();
+        let file = format!("# this is a comment\n#\nContact: {URL}\nExpires: {expires}\n#\n");
         let sec = SecurityTxt {
             acknowledgments: vec![],
             canonical: vec![],
             contact: vec![ContactField::new(URL).unwrap()],
             csaf: vec![],
             encryption: vec![],
-            expires: expires_dt(),
+            expires: expires_dt(&expires),
             extension: vec![],
             hiring: vec![],
             policy: vec![],
@@ -87,14 +92,15 @@ mod tests {
 
     #[test]
     fn test_newlines() {
-        let file = format!("\n\n\nContact: {URL}\n\n\nExpires: {EXPIRES}\n\n\n");
+        let expires = future_expires_str();
+        let file = format!("\n\n\nContact: {URL}\n\n\nExpires: {expires}\n\n\n");
         let sec = SecurityTxt {
             acknowledgments: vec![],
             canonical: vec![],
             contact: vec![ContactField::new(URL).unwrap()],
             csaf: vec![],
             encryption: vec![],
-            expires: expires_dt(),
+            expires: expires_dt(&expires),
             extension: vec![],
             hiring: vec![],
             policy: vec![],
@@ -106,14 +112,15 @@ mod tests {
 
     #[test]
     fn test_acknowledgements() {
-        let file = format!("Contact: {URL}\nExpires: {EXPIRES}\nAcknowledgments: {URL}\n");
+        let expires = future_expires_str();
+        let file = format!("Contact: {URL}\nExpires: {expires}\nAcknowledgments: {URL}\n");
         let sec = SecurityTxt {
             acknowledgments: vec![AcknowledgmentsField::new(URL).unwrap()],
             canonical: vec![],
             contact: vec![ContactField::new(URL).unwrap()],
             csaf: vec![],
             encryption: vec![],
-            expires: expires_dt(),
+            expires: expires_dt(&expires),
             extension: vec![],
             hiring: vec![],
             policy: vec![],
@@ -125,14 +132,15 @@ mod tests {
 
     #[test]
     fn test_csaf() {
-        let file = format!("Contact: {URL}\nExpires: {EXPIRES}\nCSAF: {URL}\n");
+        let expires = future_expires_str();
+        let file = format!("Contact: {URL}\nExpires: {expires}\nCSAF: {URL}\n");
         let sec = SecurityTxt {
             acknowledgments: vec![],
             canonical: vec![],
             contact: vec![ContactField::new(URL).unwrap()],
             csaf: vec![CsafField::new(URL).unwrap()],
             encryption: vec![],
-            expires: expires_dt(),
+            expires: expires_dt(&expires),
             extension: vec![],
             hiring: vec![],
             policy: vec![],
@@ -144,7 +152,8 @@ mod tests {
 
     #[test]
     fn test_contact_missing() {
-        let file = format!("Expires: {EXPIRES}\n");
+        let expires = future_expires_str();
+        let file = format!("Expires: {expires}\n");
 
         assert_eq!(file.parse::<SecurityTxt>(), Err(ParseError::ContactFieldMissing));
     }
@@ -158,21 +167,23 @@ mod tests {
 
     #[test]
     fn test_trailing_content() {
-        let file = format!("Contact: {URL}\nExpires: {EXPIRES}\nfoo");
+        let expires = future_expires_str();
+        let file = format!("Contact: {URL}\nExpires: {expires}\nfoo");
 
         assert_eq!(file.parse::<SecurityTxt>(), Err(ParseError::Malformed));
     }
 
     #[test]
     fn test_preferred_languages() {
-        let file = format!("Contact: {URL}\nExpires: {EXPIRES}\nPreferred-Languages: en, fr\n");
+        let expires = future_expires_str();
+        let file = format!("Contact: {URL}\nExpires: {expires}\nPreferred-Languages: en, fr\n");
         let sec = SecurityTxt {
             acknowledgments: vec![],
             canonical: vec![],
             contact: vec![ContactField::new(URL).unwrap()],
             csaf: vec![],
             encryption: vec![],
-            expires: expires_dt(),
+            expires: expires_dt(&expires),
             extension: vec![],
             hiring: vec![],
             policy: vec![],
@@ -184,7 +195,8 @@ mod tests {
 
     #[test]
     fn test_preferred_languages_multiple() {
-        let file = format!("Contact: {URL}\nExpires: {EXPIRES}\nPreferred-Languages: en\nPreferred-Languages: de\n");
+        let expires = future_expires_str();
+        let file = format!("Contact: {URL}\nExpires: {expires}\nPreferred-Languages: en\nPreferred-Languages: de\n");
 
         assert_eq!(
             file.parse::<SecurityTxt>(),
@@ -194,27 +206,30 @@ mod tests {
 
     #[test]
     fn test_expires_multiple() {
-        let file = format!("Contact: {URL}\nExpires: {EXPIRES}\nExpires: {EXPIRES}\n");
+        let expires = future_expires_str();
+        let file = format!("Contact: {URL}\nExpires: {expires}\nExpires: {expires}\n");
 
         assert_eq!(file.parse::<SecurityTxt>(), Err(ParseError::ExpiresFieldMultiple));
     }
 
     #[test]
     fn test_insecure_http() {
-        let file = format!("Contact: {INSECURE_URL}\nExpires: {EXPIRES}\n");
+        let expires = future_expires_str();
+        let file = format!("Contact: {INSECURE_URL}\nExpires: {expires}\n");
 
         assert_eq!(file.parse::<SecurityTxt>(), Err(ParseError::InsecureHTTP));
     }
 
     #[test]
     fn test_signed_contact() {
+        let expires = future_expires_str();
         let file = format!(
             "-----BEGIN PGP SIGNED MESSAGE-----\r
 Hash: SHA256\r
 \r
 Contact: {URL}
 Contact: {URL}\r
-Expires: {EXPIRES}\r
+Expires: {expires}\r
 -----BEGIN PGP SIGNATURE-----\r
 Version: GnuPG v2.2\r
 \r
@@ -228,7 +243,7 @@ abcdefABCDEF/+==\r
             contact: vec![ContactField::new(URL).unwrap(), ContactField::new(URL).unwrap()],
             csaf: vec![],
             encryption: vec![],
-            expires: expires_dt(),
+            expires: expires_dt(&expires),
             extension: vec![],
             hiring: vec![],
             policy: vec![],
