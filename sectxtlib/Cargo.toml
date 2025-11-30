@@ -1,6 +1,6 @@
 [package]
 name = "sectxtlib"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["eikendev"]
 edition = "2021"
 description = "A library for parsing and validating security.txt files as specified in RFC 9116"
@@ -10,7 +10,7 @@ readme = "README.md"
 license = "ISC"
 
 [dependencies]
-chrono = "0.4.10"
+chrono = ">=0.4.20"
 iri-string = "0.7.0"
 nom = ">=5.1.2, <8"
 oxilangtag = "0.1.0"
