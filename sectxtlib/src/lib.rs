@@ -16,6 +16,8 @@ pub use securitytxt_options::SecurityTxtOptions;
 
 #[cfg(test)]
 mod tests {
+    use crate::fields::CsafField;
+
     use super::*;
     use chrono::{DateTime, TimeZone, Utc};
     use std::{fs, path::PathBuf};
@@ -52,6 +54,7 @@ mod tests {
             acknowledgments: vec![],
             canonical: vec![],
             contact: vec![ContactField::new(URL).unwrap()],
+            csaf: vec![],
             encryption: vec![],
             expires: expires_dt(),
             extension: vec![],
@@ -70,6 +73,7 @@ mod tests {
             acknowledgments: vec![],
             canonical: vec![],
             contact: vec![ContactField::new(URL).unwrap()],
+            csaf: vec![],
             encryption: vec![],
             expires: expires_dt(),
             extension: vec![],
@@ -88,6 +92,7 @@ mod tests {
             acknowledgments: vec![],
             canonical: vec![],
             contact: vec![ContactField::new(URL).unwrap()],
+            csaf: vec![],
             encryption: vec![],
             expires: expires_dt(),
             extension: vec![],
@@ -106,6 +111,26 @@ mod tests {
             acknowledgments: vec![AcknowledgmentsField::new(URL).unwrap()],
             canonical: vec![],
             contact: vec![ContactField::new(URL).unwrap()],
+            csaf: vec![],
+            encryption: vec![],
+            expires: expires_dt(),
+            extension: vec![],
+            hiring: vec![],
+            policy: vec![],
+            preferred_languages: None,
+        };
+
+        assert_eq!(file.parse(), Ok(sec));
+    }
+
+    #[test]
+    fn test_csaf() {
+        let file = format!("Contact: {URL}\nExpires: {EXPIRES}\nCSAF: {URL}\n");
+        let sec = SecurityTxt {
+            acknowledgments: vec![],
+            canonical: vec![],
+            contact: vec![ContactField::new(URL).unwrap()],
+            csaf: vec![CsafField::new(URL).unwrap()],
             encryption: vec![],
             expires: expires_dt(),
             extension: vec![],
@@ -145,6 +170,7 @@ mod tests {
             acknowledgments: vec![],
             canonical: vec![],
             contact: vec![ContactField::new(URL).unwrap()],
+            csaf: vec![],
             encryption: vec![],
             expires: expires_dt(),
             extension: vec![],
@@ -200,6 +226,7 @@ abcdefABCDEF/+==\r
             acknowledgments: vec![],
             canonical: vec![],
             contact: vec![ContactField::new(URL).unwrap(), ContactField::new(URL).unwrap()],
+            csaf: vec![],
             encryption: vec![],
             expires: expires_dt(),
             extension: vec![],
@@ -255,6 +282,7 @@ abcdefABCDEF/+==\r
                 acknowledgments: vec![],
                 canonical: vec![],
                 contact: vec![ContactField::new(URL).unwrap()],
+                csaf: vec![],
                 encryption: vec![],
                 expires: ExpiresField::new(expires_str, now_dt()).unwrap(),
                 extension: vec![],
