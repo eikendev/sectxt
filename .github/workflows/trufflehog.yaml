@@ -9,7 +9,7 @@ on:
 jobs:
   scan-secrets:
     name: Scan for secrets
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
