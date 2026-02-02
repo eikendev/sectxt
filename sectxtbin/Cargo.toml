@@ -16,7 +16,7 @@ argh = "0.1.13"
 futures = "0.3.31"
 human-panic = "2.0.6"
 lazy_static = "1.5.0"
-reqwest = "0.12.28"
+reqwest = "0.13.1"
 tracing = "0.1.44"
 tracing-subscriber = { version = ">=0.3.20", features = ["env-filter", "json", "valuable"] }
 url = "2.5.8"
