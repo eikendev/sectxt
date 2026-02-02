@@ -14,14 +14,14 @@ sectxtlib = { path = "../sectxtlib", version = "0.4.0" }
 anyhow = "1.0.98"
 argh = "0.1.13"
 futures = "0.3.31"
-human-panic = "2.0.3"
+human-panic = "2.0.6"
 lazy_static = "1.5.0"
-reqwest = "0.12.22"
-tracing = "0.1.41"
+reqwest = "0.13.1"
+tracing = "0.1.44"
 tracing-subscriber = { version = ">=0.3.20", features = ["env-filter", "json", "valuable"] }
-url = "2.5.4"
+url = "2.5.8"
 valuable = "0.1.1"
 
 [dependencies.tokio]
-version = "1.47.0"
+version = "1.49.0"
 features = ["rt-multi-thread", "macros"]
