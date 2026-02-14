@@ -10,7 +10,7 @@ updates:
     commit-message:
       prefix: "deps(cargo)"
     labels:
-      - "dependencies"
+      - "area:deps"
     pull-request-branch-name:
       separator: "-"
     cooldown:
@@ -32,7 +32,7 @@ updates:
     commit-message:
       prefix: "deps(actions)"
     labels:
-      - "dependencies"
+      - "area:deps"
     pull-request-branch-name:
       separator: "-"
     groups:
