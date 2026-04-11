@@ -14,7 +14,7 @@ sectxtlib = { path = "../sectxtlib", version = "0.4.0" }
 anyhow = "1.0.102"
 argh = "0.1.19"
 futures = "0.3.32"
-human-panic = "2.0.7"
+human-panic = "2.0.8"
 lazy_static = "1.5.0"
 reqwest = "0.13.1"
 tracing = "0.1.44"
@@ -23,5 +23,5 @@ url = "2.5.8"
 valuable = "0.1.1"
 
 [dependencies.tokio]
-version = "1.50.0"
+version = "1.51.0"
 features = ["rt-multi-thread", "macros"]
