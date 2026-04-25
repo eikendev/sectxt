@@ -23,5 +23,5 @@ url = "2.5.8"
 valuable = "0.1.1"
 
 [dependencies.tokio]
-version = "1.51.0"
+version = "1.52.1"
 features = ["rt-multi-thread", "macros"]
