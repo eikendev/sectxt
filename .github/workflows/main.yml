@@ -2,6 +2,9 @@ name: Main
 
 on: push
 
+permissions:
+  contents: read
+
 jobs:
   test_publish:
     name: Test and publish
@@ -9,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Install dependencies
         run: make setup
