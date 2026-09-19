@@ -1417,7 +1417,7 @@ dependencies = [
 
 [[package]]
 name = "sectxt"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "anyhow",
  "argh",
@@ -1443,7 +1443,7 @@ dependencies = [
 
 [[package]]
 name = "sectxtlib"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "chrono",
  "iri-string",
