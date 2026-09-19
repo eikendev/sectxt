@@ -27,14 +27,16 @@ setup:
 	rustup component add clippy
 	rustup component add rustfmt
 	rustup show
+
+.PHONY: setup_fuzz
+setup_fuzz: setup
 	cargo install cargo-afl
 
 .PHONY: publish
 publish:
-	cargo publish -p sectxtlib
-	cargo publish -p sectxt
+	cargo publish --locked --workspace
 
 .PHONY: fuzz
-fuzz:
+fuzz: setup_fuzz
 	cargo afl build -p sectxtfuzz
 	AFL_SKIP_CPUFREQ=1 cargo afl fuzz -i $(FUZZ_DIR)/_examples -o $(FUZZ_DIR)/afl $(TARGET_DIR)/debug/sectxtfuzz

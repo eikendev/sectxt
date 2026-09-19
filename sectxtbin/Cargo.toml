@@ -5,7 +5,7 @@ authors = ["eikendev"]
 edition = "2021"
 description = "A tool for working with security.txt files as specified in RFC 9116"
 homepage = "https://github.com/eikendev/sectxt"
-repository = "https://github.com/eikendev/sectxt.git"
+repository = "https://github.com/eikendev/sectxt"
 readme = "README.md"
 license = "ISC"
 
@@ -25,3 +25,8 @@ valuable = "0.1.1"
 [dependencies.tokio]
 version = "1.52.3"
 features = ["rt-multi-thread", "macros"]
+
+# Matches the assets uploaded by .github/workflows/release.yaml.
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }{ archive-suffix }"
+pkg-fmt = "tgz"

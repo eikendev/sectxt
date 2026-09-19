@@ -5,9 +5,10 @@ authors = ["eikendev"]
 edition = "2021"
 description = "A fuzzer for sectxtlib"
 homepage = "https://github.com/eikendev/sectxt"
-repository = "https://github.com/eikendev/sectxt.git"
+repository = "https://github.com/eikendev/sectxt"
 readme = "README.md"
 license = "ISC"
+publish = false
 
 [dependencies]
 afl = "*"
