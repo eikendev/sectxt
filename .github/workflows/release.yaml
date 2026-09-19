@@ -8,10 +8,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
   ci:
     name: Continuous Integration
@@ -20,66 +16,88 @@ jobs:
   release:
     name: Create release
     needs: ci
-    runs-on: ubuntu-slim
-    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     permissions:
-      contents: write
-      pull-requests: write
-      issues: write
+      contents: write # Push tags and create GitHub releases.
+      pull-requests: write # Link each release back to its pull request.
+      id-token: write # Trusted publishing to crates.io.
 
     outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
+      bin_tag: ${{ steps.bin_tag.outputs.tag }}
 
     steps:
-      - name: Create GitHub release (Release Please)
-        id: release
-        uses: googleapis/release-please-action@v5
-        with:
-          config-file: release-please-config.json
-
-  publish:
-    name: Publish to crates.io
-    needs: release
-    if: ${{ needs.release.outputs.release_created }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    permissions:
-      contents: read
-      id-token: write # Trusted publishing.
-
-    steps:
-      - name: Checkout release tag
+      - name: Checkout code
         uses: actions/checkout@v7
         with:
-          ref: ${{ needs.release.outputs.tag_name }}
+          fetch-depth: 0 # release-plz needs the full history to parse commits.
           persist-credentials: false
 
       - name: Set up build environment
         run: make setup
 
-      - name: Authenticate to crates.io
-        id: auth
-        uses: rust-lang/crates-io-auth-action@v1
-
-      - name: Publish crates
+      - name: Tag and publish (release-plz)
+        id: release
+        uses: release-plz/action@v0.5.139
+        with:
+          command: release
         env:
-          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
-        run: make publish
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # No CARGO_REGISTRY_TOKEN: crates.io authentication is OIDC-based.
+
+      - name: Resolve the binary release tag
+        id: bin_tag
+        env:
+          RELEASES: ${{ steps.release.outputs.releases }}
+        run: |
+          releases="${RELEASES:-[]}"
+          [ -n "$releases" ] || releases='[]'
+          tag="$(jq -r '[.[] | select(.package_name == "sectxt") | .tag] | first // ""' <<<"$releases")"
+          echo "tag=$tag" >>"$GITHUB_OUTPUT"
+
+  release_pr:
+    name: Open release pull request
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: write # Push the release branch.
+      pull-requests: write # Open and update the release pull request.
+
+    concurrency: # Only the pull request job: a queued release must never be skipped.
+      group: release-pr-${{ github.ref }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # release-plz needs the full history to parse commits.
+          persist-credentials: false
+
+      - name: Set up build environment
+        run: make setup
+
+      - name: Open release pull request (release-plz)
+        uses: release-plz/action@v0.5.139
+        with:
+          command: release-pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   artifacts:
     name: Publish release artifacts
     needs: release
-    if: ${{ needs.release.outputs.release_created }}
+    if: ${{ needs.release.outputs.bin_tag != '' }} # Empty unless sectxt itself was released.
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
 
     permissions:
-      contents: write
+      contents: write # Attach the archives to the GitHub release.
       id-token: write # Build provenance.
-      attestations: write
+      attestations: write # Build provenance.
 
     strategy:
       matrix:
@@ -93,7 +111,7 @@ jobs:
       - name: Checkout release tag
         uses: actions/checkout@v7
         with:
-          ref: ${{ needs.release.outputs.tag_name }}
+          ref: ${{ needs.release.outputs.bin_tag }}
           persist-credentials: false
 
       - name: Set up build environment
@@ -114,7 +132,7 @@ jobs:
           locked: true
           checksum: sha256
           include: README.md,LICENSE
-          ref: refs/tags/${{ needs.release.outputs.tag_name }}
+          ref: refs/tags/${{ needs.release.outputs.bin_tag }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Attest build provenance

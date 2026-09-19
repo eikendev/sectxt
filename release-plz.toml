@@ -1,0 +1,36 @@
+[workspace]
+# Without this, every commit bumps a version.
+# Dependency updates land as `build`, and a dependency bump is worth releasing.
+release_commits = "^(feat|fix|build)"
+
+[changelog]
+header = """
+# Changelog
+
+All notable changes to this project are documented below.
+"""
+commit_parsers = [
+    { message = "^feat", group = "Features" },
+    { message = "^fix", group = "Bug Fixes" },
+    { message = "^perf", group = "Performance" },
+    { message = "^docs", group = "Documentation" },
+    { message = "^build", group = "Build" },
+    { message = ".*", skip = true },
+]
+
+[[package]]
+name = "sectxt"
+changelog_path = "CHANGELOG.md" # Relative to the workspace root.
+git_tag_name = "v{{ version }}"
+git_release_name = "v{{ version }}"
+
+[[package]]
+name = "sectxtlib"
+git_release_enable = false
+
+# Not `release = false`: that also stops release-plz updating this crate's
+# `sectxtlib` requirement, which then fails to resolve against the local path.
+[[package]]
+name = "sectxtfuzz"
+git_tag_enable = false
+git_release_enable = false

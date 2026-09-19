@@ -32,9 +32,9 @@ setup:
 setup_fuzz: setup
 	cargo install cargo-afl
 
-.PHONY: publish
-publish:
-	cargo publish --locked --workspace
+.PHONY: publish_check
+publish_check:
+	cargo publish --dry-run --locked --workspace
 
 .PHONY: fuzz
 fuzz: setup_fuzz

@@ -34,5 +34,5 @@ jobs:
       - name: Build # Also builds the rustdoc, which nothing else covers.
         run: make build
 
-      - name: Publish (dry run) # The actual publish happens in release.yaml.
-        run: cargo publish --dry-run --locked --workspace
+      - name: Publish (dry run) # The actual publish is release-plz's job.
+        run: make publish_check
