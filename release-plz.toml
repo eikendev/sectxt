@@ -1,6 +1,5 @@
 [workspace]
-# Without this, every commit bumps a version.
-# Dependency updates land as `build`, and a dependency bump is worth releasing.
+# Otherwise every commit bumps a version. Dependency updates land as `build`.
 release_commits = "^(feat|fix|build)"
 
 [changelog]
@@ -18,19 +17,22 @@ commit_parsers = [
     { message = ".*", skip = true },
 ]
 
+# Bare `vX.Y.Z`: the existing tags and the binstall `pkg-url` depend on it.
 [[package]]
 name = "sectxt"
 changelog_path = "CHANGELOG.md" # Relative to the workspace root.
 git_tag_name = "v{{ version }}"
 git_release_name = "v{{ version }}"
 
+# The GitHub release is the binary's, since that one carries the archives.
 [[package]]
 name = "sectxtlib"
 git_release_enable = false
 
-# Not `release = false`: that also stops release-plz updating this crate's
-# `sectxtlib` requirement, which then fails to resolve against the local path.
+# Internal crate. Not `release = false`: it must still be updated, so that its
+# `sectxtlib` requirement tracks the bump.
 [[package]]
 name = "sectxtfuzz"
+publish = false # Must match the Cargo.toml.
 git_tag_enable = false
 git_release_enable = false
