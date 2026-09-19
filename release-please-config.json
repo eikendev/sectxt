@@ -1,0 +1,16 @@
+{
+	"include-component-in-tag": false,
+	"pull-request-title-pattern": "chore: release v${version}",
+	"changelog-sections": [
+		{ "type": "feat", "section": "Features" },
+		{ "type": "fix", "section": "Bug Fixes" },
+		{ "type": "perf", "section": "Performance" },
+		{ "type": "docs", "section": "Documentation" },
+		{ "type": "build", "section": "Build" }
+	],
+	"packages": {
+		".": {
+			"release-type": "rust"
+		}
+	}
+}
