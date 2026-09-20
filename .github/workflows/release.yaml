@@ -128,7 +128,7 @@ jobs:
           bin: sectxt
           manifest-path: sectxtbin/Cargo.toml # The binary lives in a workspace member.
           target: ${{ matrix.target }}
-          build-tool: cargo # Native runner per arch, so no cross container.
+          build-tool: cargo-zigbuild # aws-lc-sys compiles C; musl needs a C toolchain.
           locked: true
           checksum: sha256
           include: README.md,LICENSE
