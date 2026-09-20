@@ -102,10 +102,20 @@ jobs:
     strategy:
       matrix:
         include:
+          # gnu builds aws-lc-sys with the runner's own gcc, so plain cargo.
+          - target: x86_64-unknown-linux-gnu
+            runner: ubuntu-24.04
+            build-tool: cargo
+          - target: aarch64-unknown-linux-gnu
+            runner: ubuntu-24.04-arm
+            build-tool: cargo
+          # musl is a different libc, so aws-lc-sys needs a musl C toolchain.
           - target: x86_64-unknown-linux-musl
             runner: ubuntu-24.04
+            build-tool: cargo-zigbuild
           - target: aarch64-unknown-linux-musl
             runner: ubuntu-24.04-arm
+            build-tool: cargo-zigbuild
 
     steps:
       - name: Checkout release tag
@@ -128,7 +138,7 @@ jobs:
           bin: sectxt
           manifest-path: sectxtbin/Cargo.toml # The binary lives in a workspace member.
           target: ${{ matrix.target }}
-          build-tool: cargo-zigbuild # aws-lc-sys compiles C; musl needs a C toolchain.
+          build-tool: ${{ matrix.build-tool }}
           locked: true
           checksum: sha256
           include: README.md,LICENSE
