@@ -1423,7 +1423,6 @@ dependencies = [
  "argh",
  "futures",
  "human-panic",
- "lazy_static",
  "reqwest",
  "sectxtlib",
  "tokio",

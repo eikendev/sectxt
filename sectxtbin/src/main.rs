@@ -5,16 +5,16 @@ mod website;
 
 use futures::channel::mpsc::channel;
 use futures::{Stream, StreamExt};
-use lazy_static::*;
 use reqwest::Client;
 use sectxtlib::SecurityTxtOptions;
 use settings::Settings;
 use status::Status;
 use std::io::BufRead;
+use std::sync::LazyLock;
 use std::time::Duration;
 use tracing::{debug, info};
 use tracing_subscriber::prelude::*;
-use tracing_subscriber::{fmt, EnvFilter};
+use tracing_subscriber::{EnvFilter, fmt};
 use website::Website;
 
 fn stdin(threads: usize) -> impl Stream<Item = String> {
@@ -110,9 +110,8 @@ fn setup_logger() {
 fn main() {
     human_panic::setup_panic!();
 
-    lazy_static! {
-        static ref SETTINGS: Settings = argh::from_env();
-    }
+    // process_domains borrows the settings for 'static, so they outlive main's frame.
+    static SETTINGS: LazyLock<Settings> = LazyLock::new(argh::from_env);
 
     setup_logger();
 
