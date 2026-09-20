@@ -13,4 +13,4 @@ publish = false
 
 [dependencies]
 afl = "*"
-sectxtlib = { path = "../sectxtlib", version = "0.4.1" }
+sectxtlib = { path = "../sectxtlib", version = "0.4.2" }

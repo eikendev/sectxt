@@ -1,6 +1,6 @@
 [package]
 name = "sectxtlib"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["eikendev"]
 edition = "2024"
 rust-version = "1.85" # Required by edition 2024.
