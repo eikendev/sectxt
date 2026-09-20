@@ -3,13 +3,13 @@ use crate::SecurityTxtOptions;
 use super::parse_error::ParseError;
 
 use nom::{
+    IResult, Parser,
     branch::alt,
     bytes::complete::{tag, take_while, take_while1},
     character::complete::{line_ending, none_of, one_of},
     combinator::{all_consuming, opt, peek, recognize},
     multi::{many0, many1, many1_count, separated_list1},
     sequence::{delimited, preceded, separated_pair, terminated},
-    IResult, Parser,
 };
 
 #[derive(Debug, PartialEq)]

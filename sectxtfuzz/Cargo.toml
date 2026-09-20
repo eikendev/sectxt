@@ -2,7 +2,8 @@
 name = "sectxtfuzz"
 version = "0.4.0"
 authors = ["eikendev"]
-edition = "2021"
+edition = "2024"
+rust-version = "1.85" # Required by edition 2024.
 description = "A fuzzer for sectxtlib"
 homepage = "https://github.com/eikendev/sectxt"
 repository = "https://github.com/eikendev/sectxt"

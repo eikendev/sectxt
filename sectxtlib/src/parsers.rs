@@ -3,13 +3,13 @@ use crate::{ParseError, SecurityTxtOptions};
 use super::raw_field::RawField;
 
 use nom::{
+    IResult, Parser,
     branch::alt,
     bytes::complete::{take_while, take_while1},
     character::complete::{char, crlf, satisfy},
     combinator::{all_consuming, map, opt, recognize},
     multi::{many0_count, many1},
     sequence::{preceded, terminated},
-    IResult, Parser,
 };
 
 pub(crate) struct SecurityTxtParser {

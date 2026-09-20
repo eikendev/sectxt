@@ -2,7 +2,8 @@
 name = "sectxt"
 version = "0.4.2"
 authors = ["eikendev"]
-edition = "2021"
+edition = "2024"
+rust-version = "1.85" # Required by edition 2024.
 description = "A tool for working with security.txt files as specified in RFC 9116"
 homepage = "https://github.com/eikendev/sectxt"
 repository = "https://github.com/eikendev/sectxt"
