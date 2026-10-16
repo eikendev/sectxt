@@ -3,7 +3,7 @@
 set -o errexit
 set -o errtrace
 
-SOURCEURL='http://s3.amazonaws.com/alexa-static/top-1m.csv.zip'
+SOURCEURL='https://netapi.com/netapi_top1mln.csv'
 
 cargo build --release -p sectxt
 
@@ -19,11 +19,9 @@ curl \
 	--disable \
 	--location \
 	--max-time 60 \
-	--output "$tmp_directory/top.csv.zip" \
+	--output "$tmp_directory/top-1m.csv" \
 	"$SOURCEURL"
 
-unzip "$tmp_directory/top.csv.zip" -d "$tmp_directory"
-
-xsv select 2 "$tmp_directory/top-1m.csv" | sort -u > "$tmp_directory/top.txt"
+xsv select 2 "$tmp_directory/top-1m.csv" | tail -n +2 | sort -u > "$tmp_directory/top.txt"
 
 ./target/release/sectxt --threads 50 --timeout 5 --quiet < "$tmp_directory/top.txt"
