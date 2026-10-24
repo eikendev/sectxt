@@ -39,7 +39,7 @@ jobs:
 
       - name: Tag and publish (release-plz)
         id: release
-        uses: release-plz/action@v0.5.141
+        uses: release-plz/action@v0.5.142
         with:
           command: release
         env:
@@ -81,7 +81,7 @@ jobs:
         run: make setup
 
       - name: Open release pull request (release-plz)
-        uses: release-plz/action@v0.5.141
+        uses: release-plz/action@v0.5.142
         with:
           command: release-pr
         env:
