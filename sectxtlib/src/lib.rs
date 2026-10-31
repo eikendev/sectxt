@@ -7,8 +7,8 @@ mod securitytxt;
 mod securitytxt_options;
 
 pub use fields::{
-    AcknowledgmentsField, CanonicalField, ContactField, EncryptionField, ExpiresField, ExtensionField, HiringField,
-    PolicyField, PreferredLanguagesField,
+    AcknowledgmentsField, CanonicalField, ContactField, CsafField, EncryptionField, ExpiresField, ExtensionField,
+    HiringField, PolicyField, PreferredLanguagesField,
 };
 pub use parse_error::ParseError;
 pub use securitytxt::SecurityTxt;
@@ -16,8 +16,6 @@ pub use securitytxt_options::SecurityTxtOptions;
 
 #[cfg(test)]
 mod tests {
-    use crate::fields::CsafField;
-
     use super::*;
     use chrono::{DateTime, Datelike, Duration, SecondsFormat, TimeZone, Utc};
     use std::{fs, path::PathBuf};
