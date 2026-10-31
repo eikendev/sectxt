@@ -307,30 +307,30 @@ abcdefABCDEF/+==\r
         assert_eq!(file.parse(), Ok(sec));
     }
 
-    fn _test_category(category: &str) {
+    fn assert_category_parses(category: &str) {
         let paths = get_tests_dir(category).read_dir().unwrap();
 
         for path in paths {
             let buf = fs::read_to_string(path.unwrap().path()).unwrap();
             let parse_options = get_parse_options();
             let txt = SecurityTxt::parse_with(&buf, &parse_options);
-            assert_eq!(txt.is_ok(), true);
+            assert!(txt.is_ok(), "{:?}", txt.err());
         }
     }
 
     #[test]
     fn test_category_valid_unsigned() {
-        _test_category("valid_unsigned")
+        assert_category_parses("valid_unsigned");
     }
 
     #[test]
     fn test_category_valid_signed() {
-        _test_category("valid_signed")
+        assert_category_parses("valid_signed");
     }
 
     #[test]
     fn test_category_gen_unsigned() {
-        _test_category("gen_unsigned")
+        assert_category_parses("gen_unsigned");
     }
 
     #[test]

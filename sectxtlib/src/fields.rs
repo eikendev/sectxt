@@ -211,8 +211,8 @@ pub struct ExtensionField {
 }
 
 impl ExtensionField {
-    pub(crate) fn new(name: String, value: String) -> Result<Self, ParseError> {
-        Ok(Self { name, value })
+    pub(crate) fn new(name: String, value: String) -> Self {
+        Self { name, value }
     }
 }
 
@@ -251,7 +251,7 @@ mod tests {
 
     #[test]
     fn test_extension_field_display() {
-        let field = ExtensionField::new("foo".into(), "bar".into()).unwrap();
+        let field = ExtensionField::new("foo".into(), "bar".into());
         assert_eq!(field.to_string(), "foo: bar");
     }
 }

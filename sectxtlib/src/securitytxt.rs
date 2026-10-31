@@ -1,4 +1,4 @@
-use crate::parsers::SecurityTxtParser;
+use crate::parsers;
 use crate::pgpcleartextmessage::PGPCleartextMessageParser;
 
 use super::fields::{
@@ -100,7 +100,7 @@ impl SecurityTxt {
                 "hiring" => hiring.push(HiringField::new(field.value)?),
                 "policy" => policy.push(PolicyField::new(field.value)?),
                 "preferred-languages" => preferred_languages.push(PreferredLanguagesField::new(field.value)?),
-                _ => extension.push(ExtensionField::new(name, field.value.to_owned())?),
+                _ => extension.push(ExtensionField::new(name, field.value.to_owned())),
             }
         }
 
@@ -175,18 +175,16 @@ impl SecurityTxt {
     /// assert_eq!(SecurityTxt::parse_with(text, &after), Err(ParseError::ExpiresFieldExpired));
     /// ```
     pub fn parse_with(text: &str, options: &SecurityTxtOptions) -> Result<Self, ParseError> {
-        let unsigned_parser = SecurityTxtParser::new(options);
-
         // The grammar in RFC 9116 is `body = signed / unsigned`, and a signed body always opens
         // with the cleartext header. Deciding up front means a malformed unsigned file reports
         // the unsigned parser's error instead of the signed parser's.
         if PGPCleartextMessageParser::is_signed(text) {
             let signed_parser = PGPCleartextMessageParser::new(options);
             let msg = signed_parser.parse(text)?;
-            let fields = unsigned_parser.parse(&msg.cleartext)?;
+            let fields = parsers::parse(&msg.cleartext)?;
             Self::new(fields.into_iter().flatten().collect(), options)
         } else {
-            let fields = unsigned_parser.parse(text)?;
+            let fields = parsers::parse(text)?;
             Self::new(fields.into_iter().flatten().collect(), options)
         }
     }
