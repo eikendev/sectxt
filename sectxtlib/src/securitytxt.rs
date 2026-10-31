@@ -42,6 +42,11 @@ pub struct SecurityTxt {
     /// A collection of "Hiring" fields
     pub hiring: Vec<HiringField>,
 
+    /// Whether the file was wrapped in an OpenPGP cleartext signature
+    ///
+    /// The signature itself is parsed but not verified, and is not exposed yet.
+    pub is_signed: bool,
+
     /// A collection of "Policy" fields
     pub policy: Vec<PolicyField>,
 
@@ -77,7 +82,11 @@ impl SecurityTxt {
         Ok(())
     }
 
-    pub(crate) fn new(fields: Vec<RawField>, options: &SecurityTxtOptions) -> Result<Self, ParseError> {
+    pub(crate) fn new(
+        fields: Vec<RawField>,
+        is_signed: bool,
+        options: &SecurityTxtOptions,
+    ) -> Result<Self, ParseError> {
         let mut acknowledgments: Vec<AcknowledgmentsField> = vec![];
         let mut canonical: Vec<CanonicalField> = vec![];
         let mut contact: Vec<ContactField> = vec![];
@@ -119,6 +128,7 @@ impl SecurityTxt {
             expires: expires.pop().unwrap(), // checked in Self::validate_expires()
             extension,
             hiring,
+            is_signed,
             policy,
             preferred_languages: preferred_languages.pop(),
         })
@@ -176,10 +186,10 @@ impl SecurityTxt {
         if pgpcleartextmessage::is_signed(text) {
             let msg = pgpcleartextmessage::parse(text)?;
             let fields = parsers::parse(&msg.cleartext)?;
-            Self::new(fields.into_iter().flatten().collect(), options)
+            Self::new(fields.into_iter().flatten().collect(), true, options)
         } else {
             let fields = parsers::parse(text)?;
-            Self::new(fields.into_iter().flatten().collect(), options)
+            Self::new(fields.into_iter().flatten().collect(), false, options)
         }
     }
 }

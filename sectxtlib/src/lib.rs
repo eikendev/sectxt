@@ -111,6 +111,7 @@ mod tests {
             expires: expires_dt(&expires),
             extension: vec![],
             hiring: vec![],
+            is_signed: false,
             policy: vec![],
             preferred_languages: None,
         };
@@ -131,6 +132,7 @@ mod tests {
             expires: expires_dt(&expires),
             extension: vec![],
             hiring: vec![],
+            is_signed: false,
             policy: vec![],
             preferred_languages: None,
         };
@@ -151,6 +153,7 @@ mod tests {
             expires: expires_dt(&expires),
             extension: vec![],
             hiring: vec![],
+            is_signed: false,
             policy: vec![],
             preferred_languages: None,
         };
@@ -171,6 +174,7 @@ mod tests {
             expires: expires_dt(&expires),
             extension: vec![],
             hiring: vec![],
+            is_signed: false,
             policy: vec![],
             preferred_languages: None,
         };
@@ -191,6 +195,7 @@ mod tests {
             expires: expires_dt(&expires),
             extension: vec![],
             hiring: vec![],
+            is_signed: false,
             policy: vec![],
             preferred_languages: None,
         };
@@ -234,6 +239,7 @@ mod tests {
             expires: expires_dt(&expires),
             extension: vec![],
             hiring: vec![],
+            is_signed: false,
             policy: vec![],
             preferred_languages: Some(PreferredLanguagesField::new("en, fr").unwrap()),
         };
@@ -294,6 +300,7 @@ abcdefABCDEF/+==\r
             expires: expires_dt(&expires),
             extension: vec![],
             hiring: vec![],
+            is_signed: true,
             policy: vec![],
             preferred_languages: None,
         };
@@ -301,30 +308,32 @@ abcdefABCDEF/+==\r
         assert_eq!(file.parse(), Ok(sec));
     }
 
-    fn assert_category_parses(category: &str) {
+    fn assert_category_parses(category: &str, is_signed: bool) {
         let paths = get_tests_dir(category).read_dir().unwrap();
 
         for path in paths {
-            let buf = fs::read_to_string(path.unwrap().path()).unwrap();
+            let path = path.unwrap().path();
+            let buf = fs::read_to_string(&path).unwrap();
             let parse_options = get_parse_options();
             let txt = SecurityTxt::parse_with(&buf, &parse_options);
-            assert!(txt.is_ok(), "{:?}", txt.err());
+            assert!(txt.is_ok(), "{path:?}: {:?}", txt.err());
+            assert_eq!(txt.unwrap().is_signed, is_signed, "{path:?}");
         }
     }
 
     #[test]
     fn test_category_valid_unsigned() {
-        assert_category_parses("valid_unsigned");
+        assert_category_parses("valid_unsigned", false);
     }
 
     #[test]
     fn test_category_valid_signed() {
-        assert_category_parses("valid_signed");
+        assert_category_parses("valid_signed", true);
     }
 
     #[test]
     fn test_category_gen_unsigned() {
-        assert_category_parses("gen_unsigned");
+        assert_category_parses("gen_unsigned", false);
     }
 
     #[test]
@@ -360,6 +369,7 @@ abcdefABCDEF/+==\r
                 expires: ExpiresField::new(expires_str, some_datetime()).unwrap(),
                 extension: vec![],
                 hiring: vec![],
+                is_signed: false,
                 policy: vec![],
                 preferred_languages: None,
             };
