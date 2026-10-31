@@ -3,6 +3,7 @@ use chrono::{DateTime, Utc};
 use iri_string::types::IriString;
 use oxilangtag::{LanguageTag, LanguageTagParseError};
 use std::cmp::Ordering;
+use std::fmt;
 use valuable::{Valuable, Value, Visit};
 
 macro_rules! IriStringImpl {
@@ -15,18 +16,24 @@ macro_rules! IriStringImpl {
                     return Err(ParseError::InsecureHTTP);
                 }
 
-                let log_value = uri.as_str().to_string();
+                Ok(Self { uri })
+            }
+        }
 
-                Ok(Self { uri, log_value })
+        impl fmt::Display for $structname {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.write_str(self.uri.as_str())
             }
         }
 
         impl Valuable for $structname {
             fn as_value(&self) -> Value<'_> {
-                self.log_value.as_value()
+                Value::String(self.uri.as_str())
             }
 
-            fn visit(&self, _visit: &mut dyn Visit) {}
+            fn visit(&self, visit: &mut dyn Visit) {
+                visit.visit_value(self.as_value());
+            }
         }
     };
 }
@@ -36,8 +43,6 @@ macro_rules! IriStringImpl {
 pub struct AcknowledgmentsField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
-
-    log_value: String,
 }
 IriStringImpl!(AcknowledgmentsField);
 
@@ -46,8 +51,6 @@ IriStringImpl!(AcknowledgmentsField);
 pub struct CanonicalField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
-
-    log_value: String,
 }
 IriStringImpl!(CanonicalField);
 
@@ -56,8 +59,6 @@ IriStringImpl!(CanonicalField);
 pub struct ContactField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
-
-    log_value: String,
 }
 IriStringImpl!(ContactField);
 
@@ -66,8 +67,6 @@ IriStringImpl!(ContactField);
 pub struct CsafField {
     /// The URI of the link according to the [CSAF Standard](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt)
     pub uri: IriString,
-
-    log_value: String,
 }
 IriStringImpl!(CsafField);
 
@@ -76,8 +75,6 @@ IriStringImpl!(CsafField);
 pub struct EncryptionField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
-
-    log_value: String,
 }
 IriStringImpl!(EncryptionField);
 
@@ -87,7 +84,8 @@ pub struct ExpiresField {
     /// The date and time from which the security.txt file is considered stale
     pub datetime: DateTime<Utc>,
 
-    log_value: String,
+    // Cached `Display` output, so that `Valuable::as_value` can hand out a borrowed string.
+    rendered: String,
 }
 
 impl ExpiresField {
@@ -98,9 +96,16 @@ impl ExpiresField {
             return Err(ParseError::ExpiresFieldExpired);
         }
 
-        let log_value = datetime.to_rfc3339();
+        let rendered = datetime.to_rfc3339();
 
-        Ok(Self { datetime, log_value })
+        Ok(Self { datetime, rendered })
+    }
+}
+
+impl fmt::Display for ExpiresField {
+    /// Formats the date and time according to [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339) in UTC
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.rendered)
     }
 }
 
@@ -113,10 +118,12 @@ impl PartialOrd for ExpiresField {
 
 impl Valuable for ExpiresField {
     fn as_value(&self) -> Value<'_> {
-        self.log_value.as_value()
+        Value::String(&self.rendered)
     }
 
-    fn visit(&self, _visit: &mut dyn Visit) {}
+    fn visit(&self, visit: &mut dyn Visit) {
+        visit.visit_value(self.as_value());
+    }
 }
 
 /// A [Hiring field](https://www.rfc-editor.org/rfc/rfc9116#name-hiring) links to the vendor's security-related job positions
@@ -124,8 +131,6 @@ impl Valuable for ExpiresField {
 pub struct HiringField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
-
-    log_value: String,
 }
 IriStringImpl!(HiringField);
 
@@ -134,8 +139,6 @@ IriStringImpl!(HiringField);
 pub struct PolicyField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
-
-    log_value: String,
 }
 IriStringImpl!(PolicyField);
 
@@ -145,7 +148,8 @@ pub struct PreferredLanguagesField {
     /// The set of preferred languages according to [RFC 5646](https://www.rfc-editor.org/rfc/rfc5646)
     pub languages: Vec<LanguageTag<String>>,
 
-    log_value: String,
+    // Cached `Display` output, so that `Valuable::as_value` can hand out a borrowed string.
+    rendered: String,
 }
 
 impl PreferredLanguagesField {
@@ -160,18 +164,27 @@ impl PreferredLanguagesField {
             return Err(ParseError::IllegalField);
         }
 
-        let log_value = languages.join(", ");
+        let rendered = languages.join(", ");
 
-        Ok(Self { languages, log_value })
+        Ok(Self { languages, rendered })
+    }
+}
+
+impl fmt::Display for PreferredLanguagesField {
+    /// Formats the language tags as a comma-separated list, for example `en, fr`
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.rendered)
     }
 }
 
 impl Valuable for PreferredLanguagesField {
     fn as_value(&self) -> Value<'_> {
-        self.log_value.as_value()
+        Value::String(&self.rendered)
     }
 
-    fn visit(&self, _visit: &mut dyn Visit) {}
+    fn visit(&self, visit: &mut dyn Visit) {
+        visit.visit_value(self.as_value());
+    }
 }
 
 /// The "Extension" field acts as a catch-all for any fields not explicitly supported by this library
@@ -188,5 +201,45 @@ pub struct ExtensionField {
 impl ExtensionField {
     pub(crate) fn new(name: String, value: String) -> Result<Self, ParseError> {
         Ok(Self { name, value })
+    }
+}
+
+impl fmt::Display for ExtensionField {
+    /// Formats the field as it appears in the file, `Name: value`
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}: {}", self.name, self.value)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_uri_field_display() {
+        let field = ContactField::new(" https://example.com/security ").unwrap();
+        assert_eq!(field.to_string(), "https://example.com/security");
+        assert_eq!(field.as_value().as_str(), Some("https://example.com/security"));
+    }
+
+    #[test]
+    fn test_expires_field_display() {
+        let now = DateTime::parse_from_rfc3339("2020-01-01T00:00:00Z").unwrap().into();
+        let field = ExpiresField::new("2020-06-01T02:00:00+02:00", now).unwrap();
+        assert_eq!(field.to_string(), "2020-06-01T00:00:00+00:00");
+        assert_eq!(field.as_value().as_str(), Some("2020-06-01T00:00:00+00:00"));
+    }
+
+    #[test]
+    fn test_preferred_languages_field_display() {
+        let field = PreferredLanguagesField::new("en,  FR").unwrap();
+        assert_eq!(field.to_string(), "en, fr");
+        assert_eq!(field.as_value().as_str(), Some("en, fr"));
+    }
+
+    #[test]
+    fn test_extension_field_display() {
+        let field = ExtensionField::new("foo".into(), "bar".into()).unwrap();
+        assert_eq!(field.to_string(), "foo: bar");
     }
 }
