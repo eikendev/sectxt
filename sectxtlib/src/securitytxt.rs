@@ -122,12 +122,57 @@ impl SecurityTxt {
     }
 
     /// Parses a security.txt file as a string according to [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116).
+    ///
+    /// The `Expires` field is validated against the current time. Use [`SecurityTxt::parse_with`]
+    /// to supply a different reference time.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ParseError`] if the text is not a valid security.txt file.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use sectxtlib::SecurityTxt;
+    ///
+    /// let text = "Contact: mailto:security@example.com\nExpires: 2999-01-01T00:00:00Z\n";
+    /// let sectxt = SecurityTxt::parse(text)?;
+    ///
+    /// assert_eq!(sectxt.contact[0].uri.as_str(), "mailto:security@example.com");
+    /// # Ok::<(), sectxtlib::ParseError>(())
+    /// ```
     pub fn parse(text: &str) -> Result<Self, ParseError> {
         let options = Default::default();
         Self::parse_with(text, &options)
     }
 
-    /// Parses a security.txt file as a string according to [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116).
+    /// Parses a security.txt file as a string according to [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116),
+    /// using the given [`SecurityTxtOptions`].
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ParseError`] if the text is not a valid security.txt file.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chrono::{TimeZone, Utc};
+    /// use sectxtlib::{ParseError, SecurityTxt, SecurityTxtOptions};
+    ///
+    /// let text = "Contact: https://example.com/security\nExpires: 2020-06-01T00:00:00Z\n";
+    ///
+    /// let before = SecurityTxtOptions {
+    ///     now: Utc.with_ymd_and_hms(2020, 1, 1, 0, 0, 0).unwrap(),
+    ///     ..Default::default()
+    /// };
+    /// assert!(SecurityTxt::parse_with(text, &before).is_ok());
+    ///
+    /// let after = SecurityTxtOptions {
+    ///     now: Utc.with_ymd_and_hms(2021, 1, 1, 0, 0, 0).unwrap(),
+    ///     ..Default::default()
+    /// };
+    /// assert_eq!(SecurityTxt::parse_with(text, &after), Err(ParseError::ExpiresFieldExpired));
+    /// ```
     pub fn parse_with(text: &str, options: &SecurityTxtOptions) -> Result<Self, ParseError> {
         let unsigned_parser = SecurityTxtParser::new(options);
 

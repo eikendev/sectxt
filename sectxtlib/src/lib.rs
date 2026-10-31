@@ -1,3 +1,57 @@
+//! Parse and validate [security.txt](https://securitytxt.org/) files as specified in
+//! [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116).
+//!
+//! A `security.txt` file tells security researchers how to report vulnerabilities to an
+//! organization. This crate turns the text of such a file into a [`SecurityTxt`] value and
+//! rejects files that violate the RFC: missing `Contact` or `Expires` fields, an `Expires`
+//! date in the past, duplicate single-instance fields, `http://` links, or syntax errors.
+//! Both plain files and files wrapped in an OpenPGP cleartext signature are accepted.
+//!
+//! # Examples
+//!
+//! The simplest way to parse a file is through [`str::parse`]. The `Expires` field is
+//! validated against the current time:
+//!
+//! ```
+//! use sectxtlib::SecurityTxt;
+//!
+//! let text = "Contact: https://example.com/security\nExpires: 2999-01-01T00:00:00Z\n";
+//! let sectxt: SecurityTxt = text.parse()?;
+//!
+//! assert_eq!(sectxt.contact.len(), 1);
+//! assert_eq!(sectxt.contact[0].uri.as_str(), "https://example.com/security");
+//! # Ok::<(), sectxtlib::ParseError>(())
+//! ```
+//!
+//! Invalid files produce a [`ParseError`]:
+//!
+//! ```
+//! use sectxtlib::{ParseError, SecurityTxt};
+//!
+//! let text = "Expires: 2999-01-01T00:00:00Z\n";
+//! let result: Result<SecurityTxt, _> = text.parse();
+//!
+//! assert_eq!(result, Err(ParseError::ContactFieldMissing));
+//! ```
+//!
+//! To validate a file against a different point in time, use [`SecurityTxt::parse_with`] and
+//! [`SecurityTxtOptions`]:
+//!
+//! ```
+//! use chrono::{TimeZone, Utc};
+//! use sectxtlib::{SecurityTxt, SecurityTxtOptions};
+//!
+//! let text = "Contact: https://example.com/security\nExpires: 2020-06-01T00:00:00Z\n";
+//! let options = SecurityTxtOptions {
+//!     now: Utc.with_ymd_and_hms(2020, 1, 1, 0, 0, 0).unwrap(),
+//!     ..Default::default()
+//! };
+//!
+//! let sectxt = SecurityTxt::parse_with(text, &options)?;
+//! assert_eq!(sectxt.expires.datetime, Utc.with_ymd_and_hms(2020, 6, 1, 0, 0, 0).unwrap());
+//! # Ok::<(), sectxtlib::ParseError>(())
+//! ```
+
 mod fields;
 mod parse_error;
 mod parsers;
