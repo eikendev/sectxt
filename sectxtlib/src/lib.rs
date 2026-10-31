@@ -42,10 +42,7 @@
 //! use sectxtlib::{SecurityTxt, SecurityTxtOptions};
 //!
 //! let text = "Contact: https://example.com/security\nExpires: 2020-06-01T00:00:00Z\n";
-//! let options = SecurityTxtOptions {
-//!     now: Utc.with_ymd_and_hms(2020, 1, 1, 0, 0, 0).unwrap(),
-//!     ..Default::default()
-//! };
+//! let options = SecurityTxtOptions::new().with_now(Utc.with_ymd_and_hms(2020, 1, 1, 0, 0, 0).unwrap());
 //!
 //! let sectxt = SecurityTxt::parse_with(text, &options)?;
 //! assert_eq!(sectxt.expires.datetime, Utc.with_ymd_and_hms(2020, 6, 1, 0, 0, 0).unwrap());
@@ -92,10 +89,7 @@ mod tests {
     }
 
     fn get_parse_options() -> SecurityTxtOptions {
-        SecurityTxtOptions {
-            now: some_datetime(),
-            strict: true,
-        }
+        SecurityTxtOptions::new().with_now(some_datetime())
     }
 
     fn get_tests_dir(category: &str) -> PathBuf {

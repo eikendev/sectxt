@@ -65,7 +65,7 @@ async fn process_domains(s: &'static Settings) -> (u64, u64) {
         .build()
         .unwrap();
 
-    let options: SecurityTxtOptions = SecurityTxtOptions::new(s.strict);
+    let options = SecurityTxtOptions::new();
 
     let statuses = stdin(s.threads)
         .map(|input| {

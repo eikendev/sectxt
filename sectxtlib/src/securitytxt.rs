@@ -1,5 +1,5 @@
 use crate::parsers;
-use crate::pgpcleartextmessage::PGPCleartextMessageParser;
+use crate::pgpcleartextmessage;
 
 use super::fields::{
     AcknowledgmentsField, CanonicalField, ContactField, CsafField, EncryptionField, ExpiresField, ExtensionField,
@@ -143,8 +143,7 @@ impl SecurityTxt {
     /// # Ok::<(), sectxtlib::ParseError>(())
     /// ```
     pub fn parse(text: &str) -> Result<Self, ParseError> {
-        let options = Default::default();
-        Self::parse_with(text, &options)
+        Self::parse_with(text, &SecurityTxtOptions::default())
     }
 
     /// Parses a security.txt file as a string according to [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116),
@@ -162,25 +161,18 @@ impl SecurityTxt {
     ///
     /// let text = "Contact: https://example.com/security\nExpires: 2020-06-01T00:00:00Z\n";
     ///
-    /// let before = SecurityTxtOptions {
-    ///     now: Utc.with_ymd_and_hms(2020, 1, 1, 0, 0, 0).unwrap(),
-    ///     ..Default::default()
-    /// };
+    /// let before = SecurityTxtOptions::new().with_now(Utc.with_ymd_and_hms(2020, 1, 1, 0, 0, 0).unwrap());
     /// assert!(SecurityTxt::parse_with(text, &before).is_ok());
     ///
-    /// let after = SecurityTxtOptions {
-    ///     now: Utc.with_ymd_and_hms(2021, 1, 1, 0, 0, 0).unwrap(),
-    ///     ..Default::default()
-    /// };
+    /// let after = SecurityTxtOptions::new().with_now(Utc.with_ymd_and_hms(2021, 1, 1, 0, 0, 0).unwrap());
     /// assert_eq!(SecurityTxt::parse_with(text, &after), Err(ParseError::ExpiresFieldExpired));
     /// ```
     pub fn parse_with(text: &str, options: &SecurityTxtOptions) -> Result<Self, ParseError> {
         // The grammar in RFC 9116 is `body = signed / unsigned`, and a signed body always opens
         // with the cleartext header. Deciding up front means a malformed unsigned file reports
         // the unsigned parser's error instead of the signed parser's.
-        if PGPCleartextMessageParser::is_signed(text) {
-            let signed_parser = PGPCleartextMessageParser::new(options);
-            let msg = signed_parser.parse(text)?;
+        if pgpcleartextmessage::is_signed(text) {
+            let msg = pgpcleartextmessage::parse(text)?;
             let fields = parsers::parse(&msg.cleartext)?;
             Self::new(fields.into_iter().flatten().collect(), options)
         } else {
