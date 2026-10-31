@@ -379,3 +379,27 @@ abcdefABCDEF/+==\r
         }
     }
 }
+
+#[cfg(all(test, feature = "serde"))]
+mod serde_tests {
+    use super::*;
+
+    #[test]
+    fn test_serialize_json() {
+        let text = "Contact: https://example.com/security\n\
+                    Expires: 2999-01-01T00:00:00Z\n\
+                    Preferred-Languages: en, fr\n\
+                    Foo: bar\n";
+        let sectxt: SecurityTxt = text.parse().unwrap();
+        let json = serde_json::to_value(&sectxt).unwrap();
+
+        assert_eq!(json["contact"], serde_json::json!(["https://example.com/security"]));
+        assert_eq!(json["expires"], serde_json::json!("2999-01-01T00:00:00Z"));
+        assert_eq!(json["preferred_languages"], serde_json::json!(["en", "fr"]));
+        assert_eq!(
+            json["extension"],
+            serde_json::json!([{ "name": "foo", "value": "bar" }])
+        );
+        assert_eq!(json["acknowledgments"], serde_json::json!([]));
+    }
+}

@@ -10,10 +10,21 @@ repository = "https://github.com/eikendev/sectxt"
 readme = "README.md"
 license = "ISC"
 
+[features]
+# Implements `serde::Serialize` for all public types.
+serde = ["dep:serde", "chrono/serde", "iri-string/serde", "oxilangtag/serialize"]
+
 [dependencies]
 chrono = "0.4.20"
 iri-string = "0.7.12"
 nom = "8"
 oxilangtag = "0.1.6"
+serde = { version = "1.0", features = ["derive"], optional = true }
 thiserror = "2.0"
 valuable = { version = "0.1.1", features = ["derive"] }
+
+[dev-dependencies]
+serde_json = "1.0"
+
+[package.metadata.docs.rs]
+all-features = true

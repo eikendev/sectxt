@@ -2,7 +2,7 @@ use iri_string::validate;
 use oxilangtag::LanguageTagParseError;
 use thiserror::Error;
 
-#[derive(Error, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Error, PartialEq)]
 pub enum ParseError {
     #[error("invalid syntax")]
     Malformed,

@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 
 /// Options for parsing a security.txt file
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SecurityTxtOptions {
     /// The current date and time to validate the "Expires" field against
     pub now: DateTime<Utc>,

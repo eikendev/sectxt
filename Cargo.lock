@@ -264,6 +264,7 @@ dependencies = [
  "iana-time-zone",
  "js-sys",
  "num-traits",
+ "serde",
  "wasm-bindgen",
  "windows-link",
 ]
@@ -1455,6 +1456,8 @@ dependencies = [
  "iri-string",
  "nom",
  "oxilangtag",
+ "serde",
+ "serde_json",
  "thiserror 2.0.21",
  "valuable",
 ]

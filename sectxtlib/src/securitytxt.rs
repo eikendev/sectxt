@@ -13,7 +13,8 @@ use std::str::FromStr;
 use valuable::Valuable;
 
 /// A representation of an [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116) security.txt file
-#[derive(Debug, PartialEq, Valuable)]
+#[derive(Clone, Debug, Eq, PartialEq, Valuable)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct SecurityTxt {
     /// A collection of "Acknowledgments" fields
     pub acknowledgments: Vec<AcknowledgmentsField>,

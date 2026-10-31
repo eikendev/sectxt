@@ -39,7 +39,8 @@ macro_rules! IriStringImpl {
 }
 
 /// An [Acknowledgments field](https://www.rfc-editor.org/rfc/rfc9116#name-acknowledgments) links to a page where security researchers are recognized
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(transparent))]
 pub struct AcknowledgmentsField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
@@ -47,7 +48,8 @@ pub struct AcknowledgmentsField {
 IriStringImpl!(AcknowledgmentsField);
 
 /// A [Canonical field](https://www.rfc-editor.org/rfc/rfc9116#name-canonical) contains a canonical URI for the security.txt file
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(transparent))]
 pub struct CanonicalField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
@@ -55,7 +57,8 @@ pub struct CanonicalField {
 IriStringImpl!(CanonicalField);
 
 /// A [Contact field](https://www.rfc-editor.org/rfc/rfc9116#name-contact) contains contact information to use for reporting vulnerabilities
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(transparent))]
 pub struct ContactField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
@@ -63,7 +66,8 @@ pub struct ContactField {
 IriStringImpl!(ContactField);
 
 /// A [CSAF field](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt) contains the canonical URI for the CSAF provider-metadata.json
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(transparent))]
 pub struct CsafField {
     /// The URI of the link according to the [CSAF Standard](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt)
     pub uri: IriString,
@@ -71,7 +75,8 @@ pub struct CsafField {
 IriStringImpl!(CsafField);
 
 /// An [Encryption field](https://www.rfc-editor.org/rfc/rfc9116#name-encryption) links to a key to be used for encrypted communication
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(transparent))]
 pub struct EncryptionField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
@@ -79,12 +84,14 @@ pub struct EncryptionField {
 IriStringImpl!(EncryptionField);
 
 /// The [Expires field](https://www.rfc-editor.org/rfc/rfc9116#name-expires) represents the date and time after which the security.txt file is considered stale
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(transparent))]
 pub struct ExpiresField {
     /// The date and time from which the security.txt file is considered stale
     pub datetime: DateTime<Utc>,
 
     // Cached `Display` output, so that `Valuable::as_value` can hand out a borrowed string.
+    #[cfg_attr(feature = "serde", serde(skip))]
     rendered: String,
 }
 
@@ -127,7 +134,8 @@ impl Valuable for ExpiresField {
 }
 
 /// A [Hiring field](https://www.rfc-editor.org/rfc/rfc9116#name-hiring) links to the vendor's security-related job positions
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(transparent))]
 pub struct HiringField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
@@ -135,7 +143,8 @@ pub struct HiringField {
 IriStringImpl!(HiringField);
 
 /// A [Policy field](https://www.rfc-editor.org/rfc/rfc9116#name-policy) links to the security policy page
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(transparent))]
 pub struct PolicyField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
@@ -143,12 +152,14 @@ pub struct PolicyField {
 IriStringImpl!(PolicyField);
 
 /// The [Preferred-Languages field](https://www.rfc-editor.org/rfc/rfc9116#name-preferred-languages) lists the preferred languages for security reports
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(transparent))]
 pub struct PreferredLanguagesField {
     /// The set of preferred languages according to [RFC 5646](https://www.rfc-editor.org/rfc/rfc5646)
     pub languages: Vec<LanguageTag<String>>,
 
     // Cached `Display` output, so that `Valuable::as_value` can hand out a borrowed string.
+    #[cfg_attr(feature = "serde", serde(skip))]
     rendered: String,
 }
 
@@ -190,7 +201,8 @@ impl Valuable for PreferredLanguagesField {
 /// The "Extension" field acts as a catch-all for any fields not explicitly supported by this library
 ///
 /// This feature accommodates [section 2.4 on Extensibility](https://www.rfc-editor.org/rfc/rfc9116#name-extensibility) in the specification.
-#[derive(Debug, PartialEq, Valuable)]
+#[derive(Clone, Debug, Eq, PartialEq, Valuable)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct ExtensionField {
     /// Name of the extension field
     pub name: String,
