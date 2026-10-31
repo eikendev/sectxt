@@ -177,18 +177,17 @@ impl SecurityTxt {
     pub fn parse_with(text: &str, options: &SecurityTxtOptions) -> Result<Self, ParseError> {
         let unsigned_parser = SecurityTxtParser::new(options);
 
-        match unsigned_parser.parse(text) {
-            Ok(fields) => {
-                let fields: Vec<RawField> = fields.into_iter().flatten().collect();
-                Self::new(fields, options)
-            }
-            _ => {
-                let signed_parser = PGPCleartextMessageParser::new(options);
-                let msg = signed_parser.parse(text)?;
-                let fields = unsigned_parser.parse(&msg.cleartext)?;
-                let fields: Vec<RawField> = fields.into_iter().flatten().collect();
-                Self::new(fields, options)
-            }
+        // The grammar in RFC 9116 is `body = signed / unsigned`, and a signed body always opens
+        // with the cleartext header. Deciding up front means a malformed unsigned file reports
+        // the unsigned parser's error instead of the signed parser's.
+        if PGPCleartextMessageParser::is_signed(text) {
+            let signed_parser = PGPCleartextMessageParser::new(options);
+            let msg = signed_parser.parse(text)?;
+            let fields = unsigned_parser.parse(&msg.cleartext)?;
+            Self::new(fields.into_iter().flatten().collect(), options)
+        } else {
+            let fields = unsigned_parser.parse(text)?;
+            Self::new(fields.into_iter().flatten().collect(), options)
         }
     }
 }

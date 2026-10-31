@@ -27,6 +27,8 @@ pub(crate) struct PGPCleartextMessage<'a> {
 
 impl PGPCleartextMessage<'_> {}
 
+const CLEARTEXT_HEADER: &str = "-----BEGIN PGP SIGNED MESSAGE-----";
+
 pub(crate) struct PGPCleartextMessageParser {
     options: SecurityTxtOptions,
 }
@@ -36,6 +38,12 @@ impl PGPCleartextMessageParser {
         Self {
             options: options.clone(),
         }
+    }
+
+    /// Returns whether the text opens with the OpenPGP cleartext header, which is how the
+    /// grammar in RFC 9116 distinguishes a signed body from an unsigned one.
+    pub fn is_signed(text: &str) -> bool {
+        text.starts_with(CLEARTEXT_HEADER)
     }
 
     pub fn parse<'a>(&'a self, text: &'a str) -> Result<PGPCleartextMessage<'a>, ParseError> {
@@ -77,7 +85,7 @@ impl PGPCleartextMessageParser {
 
     // cleartext-header =  %s"-----BEGIN PGP SIGNED MESSAGE-----" CRLF
     fn cleartext_header_parser<'a>(&'a self, i: &'a str) -> IResult<&'a str, &'a str> {
-        terminated(tag("-----BEGIN PGP SIGNED MESSAGE-----"), |x| self.lf_parser(x)).parse(i)
+        terminated(tag(CLEARTEXT_HEADER), |x| self.lf_parser(x)).parse(i)
     }
 
     // hash-header      =  %s"Hash: " hash-alg *("," hash-alg) CRLF
@@ -245,6 +253,17 @@ Test\r
             },
         };
         assert_eq!(signed_parser.parse(&txt), Ok(msg));
+    }
+
+    #[test]
+    fn test_is_signed() {
+        assert!(PGPCleartextMessageParser::is_signed(
+            "-----BEGIN PGP SIGNED MESSAGE-----\nHash: SHA256\n\n"
+        ));
+        assert!(!PGPCleartextMessageParser::is_signed("Contact: https://example.com\n"));
+        assert!(!PGPCleartextMessageParser::is_signed(
+            "\n-----BEGIN PGP SIGNED MESSAGE-----\n"
+        ));
     }
 
     #[test]
