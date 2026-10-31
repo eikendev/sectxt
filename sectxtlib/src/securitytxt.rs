@@ -8,10 +8,12 @@ use super::fields::{
 use super::parse_error::ParseError;
 use super::raw_field::RawField;
 use super::securitytxt_options::SecurityTxtOptions;
-use std::cmp::Ordering;
 use std::str::FromStr;
 
 /// A representation of an [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116) security.txt file
+///
+/// Two files are equal when all their fields are equal. There is no ordering between files;
+/// to sort by expiry, compare `expires.datetime`.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(feature = "valuable", derive(valuable::Valuable))]
@@ -179,13 +181,6 @@ impl SecurityTxt {
             let fields = parsers::parse(text)?;
             Self::new(fields.into_iter().flatten().collect(), options)
         }
-    }
-}
-
-impl PartialOrd for SecurityTxt {
-    #[inline]
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.expires.partial_cmp(&other.expires)
     }
 }
 
