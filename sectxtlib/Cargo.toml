@@ -11,8 +11,11 @@ readme = "README.md"
 license = "ISC"
 
 [features]
+default = ["valuable"]
 # Implements `serde::Serialize` for all public types.
 serde = ["dep:serde", "chrono/serde", "iri-string/serde", "oxilangtag/serialize"]
+# Implements `valuable::Valuable` for all public types, for structured logging with `tracing`.
+valuable = ["dep:valuable"]
 
 [dependencies]
 chrono = "0.4.20"
@@ -21,7 +24,7 @@ nom = "8"
 oxilangtag = "0.1.6"
 serde = { version = "1.0", features = ["derive"], optional = true }
 thiserror = "2.0"
-valuable = { version = "0.1.1", features = ["derive"] }
+valuable = { version = "0.1.1", features = ["derive"], optional = true }
 
 [dev-dependencies]
 serde_json = "1.0"

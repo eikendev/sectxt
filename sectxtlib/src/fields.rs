@@ -4,7 +4,6 @@ use iri_string::types::IriString;
 use oxilangtag::{LanguageTag, LanguageTagParseError};
 use std::cmp::Ordering;
 use std::fmt;
-use valuable::{Valuable, Value, Visit};
 
 macro_rules! IriStringImpl {
     ($structname:ident) => {
@@ -26,12 +25,13 @@ macro_rules! IriStringImpl {
             }
         }
 
-        impl Valuable for $structname {
-            fn as_value(&self) -> Value<'_> {
-                Value::String(self.uri.as_str())
+        #[cfg(feature = "valuable")]
+        impl valuable::Valuable for $structname {
+            fn as_value(&self) -> valuable::Value<'_> {
+                valuable::Value::String(self.uri.as_str())
             }
 
-            fn visit(&self, visit: &mut dyn Visit) {
+            fn visit(&self, visit: &mut dyn valuable::Visit) {
                 visit.visit_value(self.as_value());
             }
         }
@@ -90,7 +90,7 @@ pub struct ExpiresField {
     /// The date and time from which the security.txt file is considered stale
     pub datetime: DateTime<Utc>,
 
-    // Cached `Display` output, so that `Valuable::as_value` can hand out a borrowed string.
+    // Cached `Display` output, so that `valuable::Valuable::as_value` can hand out a borrowed string.
     #[cfg_attr(feature = "serde", serde(skip))]
     rendered: String,
 }
@@ -123,12 +123,13 @@ impl PartialOrd for ExpiresField {
     }
 }
 
-impl Valuable for ExpiresField {
-    fn as_value(&self) -> Value<'_> {
-        Value::String(&self.rendered)
+#[cfg(feature = "valuable")]
+impl valuable::Valuable for ExpiresField {
+    fn as_value(&self) -> valuable::Value<'_> {
+        valuable::Value::String(&self.rendered)
     }
 
-    fn visit(&self, visit: &mut dyn Visit) {
+    fn visit(&self, visit: &mut dyn valuable::Visit) {
         visit.visit_value(self.as_value());
     }
 }
@@ -158,7 +159,7 @@ pub struct PreferredLanguagesField {
     /// The set of preferred languages according to [RFC 5646](https://www.rfc-editor.org/rfc/rfc5646)
     pub languages: Vec<LanguageTag<String>>,
 
-    // Cached `Display` output, so that `Valuable::as_value` can hand out a borrowed string.
+    // Cached `Display` output, so that `valuable::Valuable::as_value` can hand out a borrowed string.
     #[cfg_attr(feature = "serde", serde(skip))]
     rendered: String,
 }
@@ -188,12 +189,13 @@ impl fmt::Display for PreferredLanguagesField {
     }
 }
 
-impl Valuable for PreferredLanguagesField {
-    fn as_value(&self) -> Value<'_> {
-        Value::String(&self.rendered)
+#[cfg(feature = "valuable")]
+impl valuable::Valuable for PreferredLanguagesField {
+    fn as_value(&self) -> valuable::Value<'_> {
+        valuable::Value::String(&self.rendered)
     }
 
-    fn visit(&self, visit: &mut dyn Visit) {
+    fn visit(&self, visit: &mut dyn valuable::Visit) {
         visit.visit_value(self.as_value());
     }
 }
@@ -201,8 +203,9 @@ impl Valuable for PreferredLanguagesField {
 /// The "Extension" field acts as a catch-all for any fields not explicitly supported by this library
 ///
 /// This feature accommodates [section 2.4 on Extensibility](https://www.rfc-editor.org/rfc/rfc9116#name-extensibility) in the specification.
-#[derive(Clone, Debug, Eq, PartialEq, Valuable)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "valuable", derive(valuable::Valuable))]
 pub struct ExtensionField {
     /// Name of the extension field
     pub name: String,
@@ -231,7 +234,6 @@ mod tests {
     fn test_uri_field_display() {
         let field = ContactField::new(" https://example.com/security ").unwrap();
         assert_eq!(field.to_string(), "https://example.com/security");
-        assert_eq!(field.as_value().as_str(), Some("https://example.com/security"));
     }
 
     #[test]
@@ -239,14 +241,27 @@ mod tests {
         let now = DateTime::parse_from_rfc3339("2020-01-01T00:00:00Z").unwrap().into();
         let field = ExpiresField::new("2020-06-01T02:00:00+02:00", now).unwrap();
         assert_eq!(field.to_string(), "2020-06-01T00:00:00+00:00");
-        assert_eq!(field.as_value().as_str(), Some("2020-06-01T00:00:00+00:00"));
     }
 
     #[test]
     fn test_preferred_languages_field_display() {
         let field = PreferredLanguagesField::new("en,  FR").unwrap();
         assert_eq!(field.to_string(), "en, fr");
-        assert_eq!(field.as_value().as_str(), Some("en, fr"));
+    }
+
+    #[cfg(feature = "valuable")]
+    #[test]
+    fn test_valuable_matches_display() {
+        use valuable::Valuable;
+
+        let now = DateTime::parse_from_rfc3339("2020-01-01T00:00:00Z").unwrap().into();
+        let contact = ContactField::new("https://example.com/security").unwrap();
+        let expires = ExpiresField::new("2020-06-01T02:00:00+02:00", now).unwrap();
+        let languages = PreferredLanguagesField::new("en,  FR").unwrap();
+
+        assert_eq!(contact.as_value().as_str(), Some(contact.to_string().as_str()));
+        assert_eq!(expires.as_value().as_str(), Some(expires.to_string().as_str()));
+        assert_eq!(languages.as_value().as_str(), Some(languages.to_string().as_str()));
     }
 
     #[test]

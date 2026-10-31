@@ -18,8 +18,10 @@ test: docs
 	cargo fmt -p sectxtlib --check
 	cargo fmt -p sectxt --check
 	cargo clippy -p sectxtlib --all-features --all-targets -- -D warnings
+	cargo clippy -p sectxtlib --no-default-features --all-targets -- -D warnings
 	cargo clippy -p sectxt --all-features -- -D warnings
 	cargo test -p sectxtlib --all-features
+	cargo test -p sectxtlib --no-default-features
 	cargo test -p sectxt
 
 .PHONY: setup

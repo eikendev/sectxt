@@ -10,11 +10,11 @@ use super::raw_field::RawField;
 use super::securitytxt_options::SecurityTxtOptions;
 use std::cmp::Ordering;
 use std::str::FromStr;
-use valuable::Valuable;
 
 /// A representation of an [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116) security.txt file
-#[derive(Clone, Debug, Eq, PartialEq, Valuable)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "valuable", derive(valuable::Valuable))]
 pub struct SecurityTxt {
     /// A collection of "Acknowledgments" fields
     pub acknowledgments: Vec<AcknowledgmentsField>,
