@@ -11,6 +11,7 @@ pub struct SecurityTxtOptions {
 }
 
 impl SecurityTxtOptions {
+    /// Creates options that validate the "Expires" field against the current time
     pub fn new(strict: bool) -> Self {
         Self {
             now: Utc::now(),

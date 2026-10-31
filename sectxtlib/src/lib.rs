@@ -52,6 +52,8 @@
 //! # Ok::<(), sectxtlib::ParseError>(())
 //! ```
 
+#![warn(missing_docs)]
+
 mod fields;
 mod parse_error;
 mod parsers;
