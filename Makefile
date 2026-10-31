@@ -11,15 +11,16 @@ build_bin:
 
 .PHONY: docs
 docs:
-	cargo doc -p sectxtlib
+	RUSTDOCFLAGS="-D warnings" cargo doc -p sectxtlib --all-features --no-deps
 
 .PHONY: test
-test:
+test: docs
 	cargo fmt -p sectxtlib --check
 	cargo fmt -p sectxt --check
-	cargo clippy -p sectxtlib --all-features -- -D warnings
+	cargo clippy -p sectxtlib --all-features --all-targets -- -D warnings
 	cargo clippy -p sectxt --all-features -- -D warnings
-	cargo test
+	cargo test -p sectxtlib --all-features
+	cargo test -p sectxt
 
 .PHONY: setup
 setup:
