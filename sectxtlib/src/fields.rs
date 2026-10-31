@@ -1,18 +1,27 @@
 use super::parse_error::ParseError;
 use chrono::{DateTime, Utc};
 use iri_string::types::IriString;
-use oxilangtag::{LanguageTag, LanguageTagParseError};
+use oxilangtag::LanguageTag;
 use std::cmp::Ordering;
 use std::fmt;
 
 macro_rules! IriStringImpl {
-    ($structname:ident) => {
+    ($structname:ident, $fieldname:literal) => {
         impl $structname {
+            /// The name of the field as it appears in a security.txt file
+            pub const NAME: &'static str = $fieldname;
+
             pub(crate) fn new(uri: &str) -> Result<Self, ParseError> {
-                let uri = uri.trim().parse::<IriString>()?;
+                let uri = uri
+                    .trim()
+                    .parse::<IriString>()
+                    .map_err(|source| ParseError::InvalidUri {
+                        field: Self::NAME,
+                        source,
+                    })?;
 
                 if uri.scheme_str() == "http" {
-                    return Err(ParseError::InsecureHTTP);
+                    return Err(ParseError::InsecureHTTP { field: Self::NAME });
                 }
 
                 Ok(Self { uri })
@@ -45,7 +54,7 @@ pub struct AcknowledgmentsField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
 }
-IriStringImpl!(AcknowledgmentsField);
+IriStringImpl!(AcknowledgmentsField, "Acknowledgments");
 
 /// A [Canonical field](https://www.rfc-editor.org/rfc/rfc9116#name-canonical) contains a canonical URI for the security.txt file
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -54,7 +63,7 @@ pub struct CanonicalField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
 }
-IriStringImpl!(CanonicalField);
+IriStringImpl!(CanonicalField, "Canonical");
 
 /// A [Contact field](https://www.rfc-editor.org/rfc/rfc9116#name-contact) contains contact information to use for reporting vulnerabilities
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -63,7 +72,7 @@ pub struct ContactField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
 }
-IriStringImpl!(ContactField);
+IriStringImpl!(ContactField, "Contact");
 
 /// A [CSAF field](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt) contains the canonical URI for the CSAF provider-metadata.json
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -72,7 +81,7 @@ pub struct CsafField {
     /// The URI of the link according to the [CSAF Standard](https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt)
     pub uri: IriString,
 }
-IriStringImpl!(CsafField);
+IriStringImpl!(CsafField, "CSAF");
 
 /// An [Encryption field](https://www.rfc-editor.org/rfc/rfc9116#name-encryption) links to a key to be used for encrypted communication
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -81,7 +90,7 @@ pub struct EncryptionField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
 }
-IriStringImpl!(EncryptionField);
+IriStringImpl!(EncryptionField, "Encryption");
 
 /// The [Expires field](https://www.rfc-editor.org/rfc/rfc9116#name-expires) represents the date and time after which the security.txt file is considered stale
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -97,7 +106,10 @@ pub struct ExpiresField {
 
 impl ExpiresField {
     pub(crate) fn new(datetime: &str, now: DateTime<Utc>) -> Result<Self, ParseError> {
-        let datetime: DateTime<Utc> = datetime.trim().parse()?;
+        let datetime: DateTime<Utc> = datetime
+            .trim()
+            .parse()
+            .map_err(|source| ParseError::InvalidDatetime { source })?;
 
         if datetime < now {
             return Err(ParseError::ExpiresFieldExpired);
@@ -141,7 +153,7 @@ pub struct HiringField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
 }
-IriStringImpl!(HiringField);
+IriStringImpl!(HiringField, "Hiring");
 
 /// A [Policy field](https://www.rfc-editor.org/rfc/rfc9116#name-policy) links to the security policy page
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -150,7 +162,7 @@ pub struct PolicyField {
     /// The URI of the link according to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986)
     pub uri: IriString,
 }
-IriStringImpl!(PolicyField);
+IriStringImpl!(PolicyField, "Policy");
 
 /// The [Preferred-Languages field](https://www.rfc-editor.org/rfc/rfc9116#name-preferred-languages) lists the preferred languages for security reports
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -169,12 +181,11 @@ impl PreferredLanguagesField {
         let languages = languages
             .split(',')
             .map(str::trim)
-            .map(LanguageTag::parse_and_normalize)
-            .collect::<Result<Vec<LanguageTag<String>>, LanguageTagParseError>>()?;
-
-        if languages.is_empty() {
-            return Err(ParseError::IllegalField);
-        }
+            .map(|tag| {
+                LanguageTag::parse_and_normalize(tag)
+                    .map_err(|_| ParseError::InvalidLanguageTag { tag: tag.to_owned() })
+            })
+            .collect::<Result<Vec<LanguageTag<String>>, ParseError>>()?;
 
         let rendered = languages.join(", ");
 
@@ -262,6 +273,43 @@ mod tests {
         assert_eq!(contact.as_value().as_str(), Some(contact.to_string().as_str()));
         assert_eq!(expires.as_value().as_str(), Some(expires.to_string().as_str()));
         assert_eq!(languages.as_value().as_str(), Some(languages.to_string().as_str()));
+    }
+
+    #[test]
+    fn test_uri_field_errors() {
+        assert_eq!(
+            PolicyField::new("http://example.com/policy"),
+            Err(ParseError::InsecureHTTP { field: "Policy" })
+        );
+        assert!(matches!(
+            ContactField::new("not a uri"),
+            Err(ParseError::InvalidUri { field: "Contact", .. })
+        ));
+    }
+
+    #[test]
+    fn test_expires_field_errors() {
+        let now = DateTime::parse_from_rfc3339("2020-01-01T00:00:00Z").unwrap().into();
+        assert!(matches!(
+            ExpiresField::new("tomorrow", now),
+            Err(ParseError::InvalidDatetime { .. })
+        ));
+        assert_eq!(
+            ExpiresField::new("2019-12-31T00:00:00Z", now),
+            Err(ParseError::ExpiresFieldExpired)
+        );
+    }
+
+    #[test]
+    fn test_preferred_languages_field_errors() {
+        assert_eq!(
+            PreferredLanguagesField::new("en, !!"),
+            Err(ParseError::InvalidLanguageTag { tag: "!!".into() })
+        );
+        assert_eq!(
+            PreferredLanguagesField::new(""),
+            Err(ParseError::InvalidLanguageTag { tag: String::new() })
+        );
     }
 
     #[test]

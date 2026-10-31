@@ -16,7 +16,7 @@ use nom::{
 ///
 /// Comment lines and blank lines yield `None`.
 pub(crate) fn parse(text: &str) -> Result<Vec<Option<RawField<'_>>>, ParseError> {
-    let (_, msg) = body_parser(text)?;
+    let (_, msg) = body_parser(text).map_err(|e| ParseError::malformed(text, &e))?;
     Ok(msg)
 }
 

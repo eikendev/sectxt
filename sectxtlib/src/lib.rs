@@ -223,7 +223,42 @@ mod tests {
         let expires = future_expires_str();
         let file = format!("Contact: {URL}\nExpires: {expires}\nfoo");
 
-        assert_eq!(file.parse::<SecurityTxt>(), Err(ParseError::Malformed));
+        assert_eq!(file.parse::<SecurityTxt>(), Err(ParseError::Malformed { line: 3 }));
+    }
+
+    #[test]
+    fn test_malformed_line_in_signed_file() {
+        let file = "-----BEGIN PGP SIGNED MESSAGE-----\n\
+                    Hash: SHA256\n\
+                    \n\
+                    Contact: https://example.com\n\
+                    foo\n\
+                    -----BEGIN PGP SIGNATURE-----\n\
+                    \n\
+                    abcdefABCDEF/+==\n\
+                    -----END PGP SIGNATURE-----\n";
+
+        // Line 5 of the document, line 2 of the cleartext.
+        assert_eq!(file.parse::<SecurityTxt>(), Err(ParseError::Malformed { line: 5 }));
+    }
+
+    #[test]
+    fn test_error_display() {
+        let errors = [
+            (ParseError::Malformed { line: 3 }, "invalid syntax on line 3"),
+            (
+                ParseError::InsecureHTTP { field: "Contact" },
+                "field Contact must use HTTPS",
+            ),
+            (
+                ParseError::InvalidLanguageTag { tag: "!!".into() },
+                "field Preferred-Languages has an invalid language tag \"!!\"",
+            ),
+        ];
+
+        for (error, text) in errors {
+            assert_eq!(error.to_string(), text);
+        }
     }
 
     #[test]
@@ -271,7 +306,10 @@ mod tests {
         let expires = future_expires_str();
         let file = format!("Contact: {INSECURE_URL}\nExpires: {expires}\n");
 
-        assert_eq!(file.parse::<SecurityTxt>(), Err(ParseError::InsecureHTTP));
+        assert_eq!(
+            file.parse::<SecurityTxt>(),
+            Err(ParseError::InsecureHTTP { field: "Contact" })
+        );
     }
 
     #[test]

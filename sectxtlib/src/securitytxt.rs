@@ -185,7 +185,7 @@ impl SecurityTxt {
         // the unsigned parser's error instead of the signed parser's.
         if pgpcleartextmessage::is_signed(text) {
             let msg = pgpcleartextmessage::parse(text)?;
-            let fields = parsers::parse(&msg.cleartext)?;
+            let fields = parsers::parse(&msg.cleartext).map_err(|e| e.offset_line(msg.cleartext_line_offset()))?;
             Self::new(fields.into_iter().flatten().collect(), true, options)
         } else {
             let fields = parsers::parse(text)?;

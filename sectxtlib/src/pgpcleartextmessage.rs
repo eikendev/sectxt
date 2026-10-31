@@ -35,8 +35,16 @@ pub(crate) fn is_signed(text: &str) -> bool {
 ///
 /// The signature is not verified.
 pub(crate) fn parse(text: &str) -> Result<PGPCleartextMessage<'_>, ParseError> {
-    let (_, msg) = signed_parser(text)?;
+    let (_, msg) = signed_parser(text).map_err(|e| ParseError::malformed(text, &e))?;
     Ok(msg)
+}
+
+impl PGPCleartextMessage<'_> {
+    /// The number of lines that precede the cleartext in the signed document: the cleartext
+    /// header, the hash headers and the blank separator line.
+    pub(crate) fn cleartext_line_offset(&self) -> usize {
+        2 + self.hash_armor_headers.len()
+    }
 }
 
 // RFC 9116 writes CRLF in the signed grammar, but section 2.2 of the same RFC and erratum 7743
